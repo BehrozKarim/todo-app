@@ -1,5 +1,6 @@
 import express, { Express } from "express";
 import bodyParser from 'body-parser'
+import {createUser} from "./api/user-api"
 
 const app: Express = express()
 app.use(bodyParser.json({limit: "100mb"}))
@@ -12,4 +13,8 @@ app.listen(5000, () => {
 // return hello world on get request
 app.get("/", (req, res) => {
     res.send("Hello World")
+})
+
+app.get("/signup", (req, res) => {
+    createUser(req, res)
 })
