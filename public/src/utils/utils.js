@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isAuthenticated = exports.validPassword = exports.usernameExists = void 0;
+exports.createToken = exports.isAuthenticated = exports.usernameExists = void 0;
 // validate username doesn't exist already
 const client_1 = require("@prisma/client");
 const jwt = __importStar(require("jsonwebtoken"));
@@ -51,17 +51,6 @@ function usernameExists(username) {
     });
 }
 exports.usernameExists = usernameExists;
-function validPassword(password) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (password.length < 8) {
-            return false;
-        }
-        else {
-            return true;
-        }
-    });
-}
-exports.validPassword = validPassword;
 function isAuthenticated(req, res, next) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
@@ -88,3 +77,10 @@ function isAuthenticated(req, res, next) {
     });
 }
 exports.isAuthenticated = isAuthenticated;
+function createToken(user) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d', });
+        return token;
+    });
+}
+exports.createToken = createToken;

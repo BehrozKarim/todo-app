@@ -29,12 +29,19 @@ app.get("/login", (req, res) => {
 app.get("/user", utils_1.isAuthenticated, (req, res) => {
     (0, user_api_1.getUser)(req, res);
 });
-app.put("/user/:id", (req, res) => {
+app.put("/user", (req, res) => {
     (0, user_api_1.updateUser)(req, res);
 });
-app.delete("/user/:id", (req, res) => {
+app.delete("/user", (req, res) => {
     (0, user_api_1.deleteUser)(req, res);
 });
+app.post("/logout", (req, res) => {
+    res.json({ message: "Logout Successful" });
+});
+app.post("/change-password", utils_1.isAuthenticated, (req, res) => {
+    (0, user_api_1.changePassword)(req, res);
+});
+// TODO: Remove this api
 app.get("/users", (req, res) => {
     (0, user_api_1.getAllUsers)(req, res);
 });
