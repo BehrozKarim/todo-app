@@ -56,10 +56,10 @@ const loginSchema = z.object({
 
 async function login(req: any, res: any) {
     const result = loginSchema.safeParse(req.body)
-    // if (!result.success) {
-    //     res.status(400).json(result.error)
-    //     return
-    // }
+    if (!result.success) {
+        res.status(400).json(result.error)
+        return
+    }
 
     const user = await prisma.user.findUnique({
         where: { username: req.body.username },
