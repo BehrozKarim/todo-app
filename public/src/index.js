@@ -29,12 +29,19 @@ app.get("/login", (req, res) => {
 app.get("/user", utils_1.isAuthenticated, (req, res) => {
     (0, user_api_1.getUser)(req, res);
 });
-app.put("/user/:id", (req, res) => {
+app.put("/user", (req, res) => {
     (0, user_api_1.updateUser)(req, res);
 });
-app.delete("/user/:id", (req, res) => {
+app.delete("/user", (req, res) => {
     (0, user_api_1.deleteUser)(req, res);
 });
+app.get("/logout", (req, res) => {
+    res.json({ message: "Logout Successful" });
+});
+app.post("/change-password", utils_1.isAuthenticated, (req, res) => {
+    (0, user_api_1.changePassword)(req, res);
+});
+// TODO: Remove this api
 app.get("/users", (req, res) => {
     (0, user_api_1.getAllUsers)(req, res);
 });
@@ -46,6 +53,21 @@ app.post("/todo", utils_1.isAuthenticated, (req, res) => {
 });
 app.put("/todo/:id", utils_1.isAuthenticated, (req, res) => {
     (0, todo_api_1.updateTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.get("/todo/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.getTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.get("/todo", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.getAllUserTasks)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.delete("/todo/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.deleteTask)(req, res).catch((err) => {
         res.json({ message: err.message });
     });
 });

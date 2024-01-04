@@ -1,13 +1,22 @@
 import { PrismaClient } from '@prisma/client'
-import * as jwt from 'jsonwebtoken'
 import * as dotenv from 'dotenv'
-import exp from 'constants'
-dotenv.config()
+import { z } from 'zod'
 
+dotenv.config()
 const prisma = new PrismaClient()
+const todoSchema = z.object({
+    title: z.string().min(3),
+    description: z.string().min(3),
+})
 
 async function addTask(req: any, res: any) {
-    const task = await prisma.todo.create({
+    const result = todoSchema.safeParse(req.body)
+    if (!result.success) {
+        res.status(400).json(result.error)
+        return
+    }
+
+    await prisma.todo.create({
         data: {
             title: req.body.title,
             description: req.body.description,
@@ -20,42 +29,103 @@ async function addTask(req: any, res: any) {
     })
 }
 
+const idSchema = z.object({
+    id: z.string().min(36),
+})
+
 async function getTask(req: any, res: any) {
-    const task = await prisma.todo.findUnique({
-        where: { id: req.params.id},
+    const result = idSchema.safeParse(req.params)
+    if (!result.success) {
+        res.status(400).json(result.error)
+        return
+    }
+
+    await prisma.todo.findUnique({
+        where: { id: req.params.id, userId: req.userId},
+    }).then((task) => {
+        if (!task) {
+            res.status(404).json({message: "Task not found"})
+            return
+        }
+        res.json({
+            message: "Task Fetched Successfully",
+            task: task
+        })
+    }).catch((err) => {
+        res.json({message: err})
     })
-    res.json(task)
+
+}
+
+const updateTodoSchema = z.object({
+    title: z.string().min(3).optional(),
+    description: z.string().min(3).optional(),
+    completed: z.boolean().optional(),
+})
+
+async function updateTask(req: any, res: any) {
+    const result = updateTodoSchema.safeParse(req.body)
+    if (!result.success) {
+        res.status(400).json(result.error)
+        return
+    }
+
+    const idCheck = idSchema.safeParse(req.params)
+    if (!idCheck.success) {
+        res.status(400).json(idCheck.error)
+        return
+    }
+
+    let current_task = await prisma.todo.findUnique({
+        where: { id: req.params.id, userId: req.userId},
+    }).catch((err) => {
+        res.json({message: err.message})
+    })
+    
+    if (!current_task) {
+        res.status(404).json({message: "Task not found"})
+        return
+    }
+
+    current_task.completed = req.body.completed ? req.body.completed : current_task.completed
+    current_task.title = req.body.title ? req.body.title : current_task.title
+    current_task.description = req.body.description ? req.body.description : current_task.description
+    current_task.updatedAt = new Date()
+    current_task = await prisma.todo.update({
+        where: { id: req.params.id, },
+        data: current_task,
+    }).catch((err) => {
+        res.json({message: err.message})
+    })
+
+    res.json({message: "Task Updated Successfully", task: current_task})
 }
 
 async function getAllUserTasks(req: any, res: any) {
     const tasks = await prisma.todo.findMany({
-        where: { userId: req.params.id},
+        where: { userId: req.userId},
+    }).then((tasks) => {
+        res.json(tasks)
+    }
+    ).catch((err) => {
+        res.json({message: err.message})
     })
-    res.json(tasks)
-}
-
-async function updateTask(req: any, res: any) {
-    let current_task = await prisma.todo.findUnique({
-        where: { id: req.params.id},
-    })
-    
-    const task = await prisma.todo.update({
-        where: { id: req.params.id},
-        data: {
-            // if title and description exist in req.body, then update, otherwise don't
-            title: req.body.title ? req.body.title : current_task?.title,
-            description: req.body.description ? req.body.description : current_task?.description,
-            completed: req.body.completed ? req.body.completed : current_task?.completed,
-        },
-    })
-    res.json(task)
 }
 
 async function deleteTask(req: any, res: any) {
-    const task = await prisma.todo.delete({
-        where: { id: req.params.id},
+    const result = idSchema.safeParse(req.params)
+    if (!result.success) {
+        res.status(400).json(result.error)
+        return
+    }
+
+    await prisma.todo.delete({
+        where: { id: req.params.id, userId: req.userId},
+    }).then((task) => {
+        res.json({message: "Task Deleted Successfully", task: task})
+    }).catch((err) => {
+        res.json({message: err})
     })
-    res.json(task)
 }
 
 

@@ -1,6 +1,6 @@
 import express, { Express } from "express";
 import bodyParser from 'body-parser'
-import {createUser, getUser, deleteUser, getAllUsers, updateUser, login} from "./api/user-api"
+import {createUser, getUser, deleteUser, getAllUsers, updateUser, login, changePassword} from "./api/user-api"
 import {isAuthenticated} from "./utils/utils"
 import { addTask, deleteTask, getAllUserTasks, getTask, updateTask } from "./api/todo-api"
 import dotenv from "dotenv"
@@ -31,14 +31,23 @@ app.get("/user", isAuthenticated, (req, res) => {
     getUser(req, res)
 })
 
-app.put("/user/:id", (req, res) => {
+app.put("/user", (req, res) => {
     updateUser(req, res)
 })
 
-app.delete("/user/:id", (req, res) => {
+app.delete("/user", (req, res) => {
     deleteUser(req, res)
 })
 
+app.get("/logout", (req, res) => {
+    res.json({message: "Logout Successful"})
+})
+
+app.post("/change-password", isAuthenticated, (req, res) => {
+    changePassword(req, res)
+})
+
+// TODO: Remove this api
 app.get("/users", (req, res) => {
     getAllUsers(req, res)
 })
@@ -55,3 +64,22 @@ app.put("/todo/:id", isAuthenticated, (req, res) => {
         res.json({message: err.message})
     })
 })
+
+app.get("/todo/:id", isAuthenticated, (req, res) => {
+    getTask(req, res).catch((err) => {
+        res.json({message: err.message})
+    })
+})
+
+app.get("/todo", isAuthenticated, (req, res) => {
+    getAllUserTasks(req, res).catch((err) => {
+        res.json({message: err.message})
+    })
+})
+
+app.delete("/todo/:id", isAuthenticated, (req, res) => {
+    deleteTask(req, res).catch((err) => {
+        res.json({message: err.message})
+    })
+})
+
