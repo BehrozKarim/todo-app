@@ -35,11 +35,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteTask = exports.updateTask = exports.getAllUserTasks = exports.getTask = exports.addTask = void 0;
 const client_1 = require("@prisma/client");
 const dotenv = __importStar(require("dotenv"));
+const zod_1 = require("zod");
 dotenv.config();
 const prisma = new client_1.PrismaClient();
+const todoSchema = zod_1.z.object({
+    title: zod_1.z.string().min(3),
+    description: zod_1.z.string().min(3),
+});
 function addTask(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        const task = yield prisma.todo.create({
+        const result = todoSchema.safeParse(req.body);
+        if (!result.success) {
+            res.status(400).json(result.error);
+            return;
+        }
+        yield prisma.todo.create({
             data: {
                 title: req.body.title,
                 description: req.body.description,
@@ -53,44 +63,85 @@ function addTask(req, res) {
     });
 }
 exports.addTask = addTask;
+const idSchema = zod_1.z.object({
+    id: zod_1.z.string().min(36),
+});
 function getTask(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
+        const result = idSchema.safeParse(req.params);
+        if (!result.success) {
+            res.status(400).json(result.error);
+            return;
+        }
         const task = yield prisma.todo.findUnique({
             where: { id: req.params.id },
+        }).then((task) => {
+            res.json({
+                message: "Task Fetched Successfully",
+                task: task
+            });
+        }).catch((err) => {
+            res.json({ message: err.message });
         });
-        res.json(task);
     });
 }
 exports.getTask = getTask;
-function getAllUserTasks(req, res) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const tasks = yield prisma.todo.findMany({
-            where: { userId: req.params.id },
-        });
-        res.json(tasks);
-    });
-}
-exports.getAllUserTasks = getAllUserTasks;
+const updateTodoSchema = zod_1.z.object({
+    title: zod_1.z.string().min(3).optional(),
+    description: zod_1.z.string().min(3).optional(),
+    completed: zod_1.z.boolean().optional(),
+});
 function updateTask(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
+        const result = updateTodoSchema.safeParse(req.body);
+        if (!result.success) {
+            res.status(400).json(result.error);
+            return;
+        }
+        const idCheck = idSchema.safeParse(req.params);
+        if (!idCheck.success) {
+            res.status(400).json(idCheck.error);
+            return;
+        }
         let current_task = yield prisma.todo.findUnique({
             where: { id: req.params.id },
+        }).catch((err) => {
+            res.json({ message: err.message });
         });
-        const task = yield prisma.todo.update({
+        yield prisma.todo.update({
             where: { id: req.params.id },
             data: {
-                // if title and description exist in req.body, then update, otherwise don't
                 title: req.body.title ? req.body.title : current_task === null || current_task === void 0 ? void 0 : current_task.title,
                 description: req.body.description ? req.body.description : current_task === null || current_task === void 0 ? void 0 : current_task.description,
                 completed: req.body.completed ? req.body.completed : current_task === null || current_task === void 0 ? void 0 : current_task.completed,
             },
+        }).then((task) => {
+            res.json({ message: "Task Updated Successfully", task: task });
+        }).catch((err) => {
+            res.json({ message: err.message });
         });
-        res.json(task);
     });
 }
 exports.updateTask = updateTask;
+function getAllUserTasks(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tasks = yield prisma.todo.findMany({
+            where: { userId: req.userId },
+        }).then((tasks) => {
+            res.json(tasks);
+        }).catch((err) => {
+            res.json({ message: err.message });
+        });
+    });
+}
+exports.getAllUserTasks = getAllUserTasks;
 function deleteTask(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
+        const result = idSchema.safeParse(req.params);
+        if (!result.success) {
+            res.status(400).json(result.error);
+            return;
+        }
         const task = yield prisma.todo.delete({
             where: { id: req.params.id },
         });
