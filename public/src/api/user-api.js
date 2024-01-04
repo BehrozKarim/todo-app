@@ -32,24 +32,64 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllUsers = exports.getUser = exports.deleteUser = exports.updateUser = exports.createUser = void 0;
+exports.login = exports.getAllUsers = exports.getUser = exports.deleteUser = exports.updateUser = exports.createUser = void 0;
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcrypt"));
+const utils_1 = require("../utils/utils");
+const jwt = __importStar(require("jsonwebtoken"));
+const dotenv = __importStar(require("dotenv"));
+dotenv.config();
 const prisma = new client_1.PrismaClient();
 function createUser(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         let password_hash = yield bcrypt.hash(req.body.password, 10);
+        if (yield (0, utils_1.usernameExists)(req.body.username)) {
+            res.status(400).json("Username already exists");
+            return;
+        }
         const user = yield prisma.user.create({
             data: {
                 name: req.body.name,
                 username: req.body.username,
                 password: password_hash,
             },
+        }).then((user) => {
+            res.json(user);
+        }).catch((err) => {
+            res.json(err.message);
         });
-        res.json(user);
     });
 }
 exports.createUser = createUser;
+function login(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield prisma.user.findUnique({
+            where: { username: req.body.username },
+        });
+        if (user) {
+            if (yield bcrypt.compare(req.body.password, user.password)) {
+                const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1d', });
+                res.json({ token: token,
+                    expiresIn: '1d',
+                    userId: user.id,
+                    username: user.username,
+                    name: user.name });
+            }
+            else {
+                res.status(400).json("Invalid Password");
+            }
+        }
+        else {
+            res.status(400).json("Invalid Username");
+        }
+    });
+}
+exports.login = login;
+function logout(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        res.json("Logged out");
+    });
+}
 function updateUser(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = yield prisma.user.update({

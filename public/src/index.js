@@ -6,16 +6,39 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const user_api_1 = require("./api/user-api");
+const utils_1 = require("./utils/utils");
+const todo_api_1 = require("./api/todo-api");
+const dotenv_1 = __importDefault(require("dotenv"));
 const app = (0, express_1.default)();
+dotenv_1.default.config();
 app.use(body_parser_1.default.json({ limit: "100mb" }));
 app.use(body_parser_1.default.urlencoded({ limit: "50mb", extended: true }));
 app.listen(5000, () => {
     console.log("App running on 5000 port");
 });
-// return hello world on get request
 app.get("/", (req, res) => {
     res.send("Hello World");
 });
-app.get("/signup", (req, res) => {
+// User APIs
+app.post("/signup", (req, res) => {
     (0, user_api_1.createUser)(req, res);
+});
+app.get("/login", (req, res) => {
+    (0, user_api_1.login)(req, res);
+});
+app.get("/user/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, user_api_1.getUser)(req, res);
+});
+app.get("/users", (req, res) => {
+    (0, user_api_1.getAllUsers)(req, res);
+});
+app.put("/user/:id", (req, res) => {
+    (0, user_api_1.updateUser)(req, res);
+});
+app.delete("/user/:id", (req, res) => {
+    (0, user_api_1.deleteUser)(req, res);
+});
+// TODO List APIs
+app.post("/todo", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.addTask)(req, res);
 });

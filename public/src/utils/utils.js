@@ -32,39 +32,60 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllUserTasks = exports.getTask = exports.addTask = void 0;
+exports.isAuthenticated = exports.validPassword = exports.usernameExists = void 0;
+// validate username doesn't exist already
 const client_1 = require("@prisma/client");
-const dotenv = __importStar(require("dotenv"));
-dotenv.config();
+const jwt = __importStar(require("jsonwebtoken"));
 const prisma = new client_1.PrismaClient();
-function addTask(req, res) {
+function usernameExists(username) {
     return __awaiter(this, void 0, void 0, function* () {
-        const task = yield prisma.todo.create({
-            data: {
-                title: req.body.title,
-                description: req.body.description,
-                userId: req.body.userId,
-            },
+        const user = yield prisma.user.findUnique({
+            where: { username: username },
         });
-        res.json(task);
+        if (user) {
+            return true;
+        }
+        else {
+            return false;
+        }
     });
 }
-exports.addTask = addTask;
-function getTask(req, res) {
+exports.usernameExists = usernameExists;
+function validPassword(password) {
     return __awaiter(this, void 0, void 0, function* () {
-        const task = yield prisma.todo.findUnique({
-            where: { id: req.params.id },
-        });
-        res.json(task);
+        if (password.length < 8) {
+            return false;
+        }
+        else {
+            return true;
+        }
     });
 }
-exports.getTask = getTask;
-function getAllUserTasks(req, res) {
+exports.validPassword = validPassword;
+function isAuthenticated(req, res, next) {
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        const tasks = yield prisma.todo.findMany({
-            where: { userId: req.params.id },
-        });
-        res.json(tasks);
+        // extract bearer token from request header
+        // const token = req.headers.authorization
+        const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
+        if (!token) {
+            res.status(401).json("Unauthorized");
+        }
+        else {
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                if (decoded.id) {
+                    req.userId = decoded.id;
+                    next();
+                }
+                else {
+                    res.status(401).json("Unauthorized");
+                }
+            }
+            catch (error) {
+                res.status(401).json("Unauthorized");
+            }
+        }
     });
 }
-exports.getAllUserTasks = getAllUserTasks;
+exports.isAuthenticated = isAuthenticated;
