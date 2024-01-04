@@ -73,15 +73,19 @@ function getTask(req, res) {
             res.status(400).json(result.error);
             return;
         }
-        const task = yield prisma.todo.findUnique({
-            where: { id: req.params.id },
+        yield prisma.todo.findUnique({
+            where: { id: req.params.id, userId: req.userId },
         }).then((task) => {
+            if (!task) {
+                res.status(404).json({ message: "Task not found" });
+                return;
+            }
             res.json({
                 message: "Task Fetched Successfully",
                 task: task
             });
         }).catch((err) => {
-            res.json({ message: err.message });
+            res.json({ message: err });
         });
     });
 }
@@ -104,22 +108,25 @@ function updateTask(req, res) {
             return;
         }
         let current_task = yield prisma.todo.findUnique({
-            where: { id: req.params.id },
+            where: { id: req.params.id, userId: req.userId },
         }).catch((err) => {
             res.json({ message: err.message });
         });
-        yield prisma.todo.update({
-            where: { id: req.params.id },
-            data: {
-                title: req.body.title ? req.body.title : current_task === null || current_task === void 0 ? void 0 : current_task.title,
-                description: req.body.description ? req.body.description : current_task === null || current_task === void 0 ? void 0 : current_task.description,
-                completed: req.body.completed ? req.body.completed : current_task === null || current_task === void 0 ? void 0 : current_task.completed,
-            },
-        }).then((task) => {
-            res.json({ message: "Task Updated Successfully", task: task });
+        if (!current_task) {
+            res.status(404).json({ message: "Task not found" });
+            return;
+        }
+        current_task.completed = req.body.completed ? req.body.completed : current_task.completed;
+        current_task.title = req.body.title ? req.body.title : current_task.title;
+        current_task.description = req.body.description ? req.body.description : current_task.description;
+        current_task.updatedAt = new Date();
+        current_task = yield prisma.todo.update({
+            where: { id: req.params.id, },
+            data: current_task,
         }).catch((err) => {
             res.json({ message: err.message });
         });
+        res.json({ message: "Task Updated Successfully", task: current_task });
     });
 }
 exports.updateTask = updateTask;
@@ -142,10 +149,13 @@ function deleteTask(req, res) {
             res.status(400).json(result.error);
             return;
         }
-        const task = yield prisma.todo.delete({
-            where: { id: req.params.id },
+        yield prisma.todo.delete({
+            where: { id: req.params.id, userId: req.userId },
+        }).then((task) => {
+            res.json({ message: "Task Deleted Successfully", task: task });
+        }).catch((err) => {
+            res.json({ message: err });
         });
-        res.json(task);
     });
 }
 exports.deleteTask = deleteTask;

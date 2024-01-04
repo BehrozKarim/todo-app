@@ -64,3 +64,22 @@ app.put("/todo/:id", isAuthenticated, (req, res) => {
         res.json({message: err.message})
     })
 })
+
+app.get("/todo/:id", isAuthenticated, (req, res) => {
+    getTask(req, res).catch((err) => {
+        res.json({message: err.message})
+    })
+})
+
+app.get("/todo", isAuthenticated, (req, res) => {
+    getAllUserTasks(req, res).catch((err) => {
+        res.json({message: err.message})
+    })
+})
+
+app.delete("/todo/:id", isAuthenticated, (req, res) => {
+    deleteTask(req, res).catch((err) => {
+        res.json({message: err.message})
+    })
+})
+

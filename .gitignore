@@ -3,4 +3,3 @@ node_modules
 prisma/dev.db
 .vscode
 prisma/dev.db-journal
-public/*

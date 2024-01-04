@@ -83,10 +83,10 @@ const loginSchema = zod_1.z.object({
 function login(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
         const result = loginSchema.safeParse(req.body);
-        // if (!result.success) {
-        //     res.status(400).json(result.error)
-        //     return
-        // }
+        if (!result.success) {
+            res.status(400).json(result.error);
+            return;
+        }
         const user = yield prisma.user.findUnique({
             where: { username: req.body.username },
         });

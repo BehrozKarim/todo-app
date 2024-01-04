@@ -56,3 +56,18 @@ app.put("/todo/:id", utils_1.isAuthenticated, (req, res) => {
         res.json({ message: err.message });
     });
 });
+app.get("/todo/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.getTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.get("/todo", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.getAllUserTasks)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.delete("/todo/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.deleteTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
