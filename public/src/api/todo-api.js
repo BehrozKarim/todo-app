@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllUserTasks = exports.getTask = exports.addTask = void 0;
+exports.deleteTask = exports.updateTask = exports.getAllUserTasks = exports.getTask = exports.addTask = void 0;
 const client_1 = require("@prisma/client");
 const dotenv = __importStar(require("dotenv"));
 dotenv.config();
@@ -43,10 +43,13 @@ function addTask(req, res) {
             data: {
                 title: req.body.title,
                 description: req.body.description,
-                userId: req.body.userId,
+                userId: req.userId,
             },
+        }).then((task) => {
+            res.json({ message: "Task Created Successfully", task: task });
+        }).catch((err) => {
+            res.json({ message: err.message });
         });
-        res.json(task);
     });
 }
 exports.addTask = addTask;
@@ -68,3 +71,30 @@ function getAllUserTasks(req, res) {
     });
 }
 exports.getAllUserTasks = getAllUserTasks;
+function updateTask(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let current_task = yield prisma.todo.findUnique({
+            where: { id: req.params.id },
+        });
+        const task = yield prisma.todo.update({
+            where: { id: req.params.id },
+            data: {
+                // if title and description exist in req.body, then update, otherwise don't
+                title: req.body.title ? req.body.title : current_task === null || current_task === void 0 ? void 0 : current_task.title,
+                description: req.body.description ? req.body.description : current_task === null || current_task === void 0 ? void 0 : current_task.description,
+                completed: req.body.completed ? req.body.completed : current_task === null || current_task === void 0 ? void 0 : current_task.completed,
+            },
+        });
+        res.json(task);
+    });
+}
+exports.updateTask = updateTask;
+function deleteTask(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const task = yield prisma.todo.delete({
+            where: { id: req.params.id },
+        });
+        res.json(task);
+    });
+}
+exports.deleteTask = deleteTask;

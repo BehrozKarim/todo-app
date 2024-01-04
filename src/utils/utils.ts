@@ -24,8 +24,8 @@ async function validPassword(password: string) {
 }
 
 async function isAuthenticated(req: any, res: any, next: any) {
-    // extract bearer token from request header
-    // const token = req.headers.authorization
+    
+    // spliting to extract token only
     const token = req.headers.authorization?.split(" ")[1]
     if (!token) {
         res.status(401).json("Unauthorized")

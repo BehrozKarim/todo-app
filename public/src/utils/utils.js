@@ -65,8 +65,7 @@ exports.validPassword = validPassword;
 function isAuthenticated(req, res, next) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
-        // extract bearer token from request header
-        // const token = req.headers.authorization
+        // spliting to extract token only
         const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(" ")[1];
         if (!token) {
             res.status(401).json("Unauthorized");

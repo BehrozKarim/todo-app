@@ -26,11 +26,8 @@ app.post("/signup", (req, res) => {
 app.get("/login", (req, res) => {
     (0, user_api_1.login)(req, res);
 });
-app.get("/user/:id", utils_1.isAuthenticated, (req, res) => {
+app.get("/user", utils_1.isAuthenticated, (req, res) => {
     (0, user_api_1.getUser)(req, res);
-});
-app.get("/users", (req, res) => {
-    (0, user_api_1.getAllUsers)(req, res);
 });
 app.put("/user/:id", (req, res) => {
     (0, user_api_1.updateUser)(req, res);
@@ -38,7 +35,17 @@ app.put("/user/:id", (req, res) => {
 app.delete("/user/:id", (req, res) => {
     (0, user_api_1.deleteUser)(req, res);
 });
+app.get("/users", (req, res) => {
+    (0, user_api_1.getAllUsers)(req, res);
+});
 // TODO List APIs
 app.post("/todo", utils_1.isAuthenticated, (req, res) => {
-    (0, todo_api_1.addTask)(req, res);
+    (0, todo_api_1.addTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.put("/todo/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.updateTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
 });

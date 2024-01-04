@@ -17,7 +17,6 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   password  String
-  todos     todo[]
 }
 
 model todo {
@@ -28,5 +27,4 @@ model todo {
   updatedAt DateTime @updatedAt
   completed Boolean  @default(false)
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
 }
