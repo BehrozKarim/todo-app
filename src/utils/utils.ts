@@ -4,6 +4,10 @@ import * as jwt from 'jsonwebtoken'
 
 const prisma = new PrismaClient()
 
+type User = {
+    id: string,
+}
+
 async function usernameExists(username: string) {
     const user = await prisma.user.findUnique({
         where: { username: username },
@@ -12,14 +16,6 @@ async function usernameExists(username: string) {
         return true
     } else {
         return false
-    }
-}
-
-async function validPassword(password: string) {
-    if (password.length < 8) {
-        return false
-    } else {
-        return true
     }
 }
 
@@ -45,5 +41,15 @@ async function isAuthenticated(req: any, res: any, next: any) {
 }
 
 
+async function createToken(user: User) {
+    const token = jwt.sign(
+        { id: user.id},
+        process.env.JWT_SECRET as string, 
+        {expiresIn: '1d',}
+        )
+    return token
+}
 
-export { usernameExists, validPassword, isAuthenticated }
+
+
+export { usernameExists, isAuthenticated, createToken }
