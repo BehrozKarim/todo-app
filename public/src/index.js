@@ -35,7 +35,7 @@ app.put("/user", (req, res) => {
 app.delete("/user", (req, res) => {
     (0, user_api_1.deleteUser)(req, res);
 });
-app.post("/logout", (req, res) => {
+app.get("/logout", (req, res) => {
     res.json({ message: "Logout Successful" });
 });
 app.post("/change-password", utils_1.isAuthenticated, (req, res) => {

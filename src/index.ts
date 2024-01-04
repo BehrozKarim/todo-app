@@ -39,7 +39,7 @@ app.delete("/user", (req, res) => {
     deleteUser(req, res)
 })
 
-app.post("/logout", (req, res) => {
+app.get("/logout", (req, res) => {
     res.json({message: "Logout Successful"})
 })
 
