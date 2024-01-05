@@ -63,14 +63,14 @@ function createUser(req, res) {
                 username: req.body.username,
                 password: password_hash,
             },
-        }).then((user) => {
-            const token = (0, utils_1.createToken)({ id: user.id });
+        }).then((user) => __awaiter(this, void 0, void 0, function* () {
+            const token = yield (0, utils_1.createToken)({ id: user.id });
             res.json({ token: token,
                 expiresIn: '1d',
                 userId: user.id,
                 username: user.username,
                 name: user.name });
-        }).catch((err) => {
+        })).catch((err) => {
             res.json(err.message);
         });
     });
@@ -129,7 +129,11 @@ function updateUser(req, res) {
                 username: req.body.username ? req.body.username : currentDetails === null || currentDetails === void 0 ? void 0 : currentDetails.username,
             },
         }).then((user) => {
-            res.json(user.id, user.name, user.username);
+            res.json({
+                userId: user.id,
+                name: user.name,
+                username: user.username
+            });
         }).
             catch((err) => {
             res.json(err.message);
@@ -151,16 +155,12 @@ function deleteUser(req, res) {
 exports.deleteUser = deleteUser;
 function getUser(req, res) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (req.userId !== req.params.id) {
-            res.status(401).json("Unauthorized");
-            return;
-        }
         yield prisma.user.findUnique({
-            where: { id: req.params.id },
+            where: { id: req.userId },
         }).then((user) => {
             res.json(user);
         }).catch((err) => {
-            res.json(err.message);
+            res.json(err);
         });
     });
 }
