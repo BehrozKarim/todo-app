@@ -104,12 +104,6 @@ async function updateUser(req: customRequest, res: Response) {
         return
     }
 
-    if (await usernameExists(req.body.username)) {
-        res.status(400).json(
-            "Username already exists")
-        return
-    }
-
     // if request body is empty
     if (Object.keys(req.body).length === 0) {
         res.status(400).json("Empty request body")
@@ -126,6 +120,14 @@ async function updateUser(req: customRequest, res: Response) {
         }
 
         currentUserDetails.name = req.body.name ? req.body.name : currentUserDetails.name
+
+        if (req.body.username) {
+            if (await usernameExists(req.body.username)) {
+                res.status(400).json(
+                    "Username already exists")
+                return
+            }
+        }
         currentUserDetails.username = req.body.username ? req.body.username : currentUserDetails.username
         currentUserDetails.updatedAt = new Date()
         currentUserDetails = await prisma.user.update({
@@ -137,7 +139,7 @@ async function updateUser(req: customRequest, res: Response) {
             },
         })
         res.json(
-            {message: "User updated successfully",
+            {message: "User Details updated successfully",
             userId: currentUserDetails.id,
             username: currentUserDetails.username,
             name: currentUserDetails.name},
