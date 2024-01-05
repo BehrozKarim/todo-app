@@ -3,9 +3,13 @@ import * as bcrypt from 'bcrypt'
 import { usernameExists, createToken } from '../utils/utils'
 import * as jwt from 'jsonwebtoken'
 import * as dotenv from 'dotenv'
-import { any, z } from 'zod'
+import { z } from 'zod'
+import { Request, Response } from 'express'
 dotenv.config()
 
+interface customRequest extends Request {
+    userId?: string
+}
 
 const prisma = new PrismaClient()
 
@@ -15,7 +19,7 @@ const signupSchema = z.object({
     password: z.string().min(8),
 })
 
-async function createUser(req: any, res: any) {
+async function createUser(req: Request, res: Response) {
     const result = signupSchema.safeParse(req.body)
     if (!result.success) {
         res.status(400).json(result.error)
@@ -28,7 +32,6 @@ async function createUser(req: any, res: any) {
             "Username already exists")
         return
     }
-  
     try {
         const user = await prisma.user.create({
             data: {
@@ -56,7 +59,7 @@ const loginSchema = z.object({
     password: z.string().min(8),
 })
 
-async function login(req: any, res: any) {
+async function login(req: Request, res: Response) {
     const result = loginSchema.safeParse(req.body)
     if (!result.success) {
         res.status(400).json(result.error)
@@ -84,10 +87,11 @@ async function login(req: any, res: any) {
     }
 }
 
-async function logout(req: any, res: any) {
+async function logout(req: Request, res: Response) {
     res.json("Logged out")
 }
 
+// attributes should be optional
 const updateUserSchema = z.object({
     name: z.string().min(3).optional(),
     username: z.string().min(3).optional(),
@@ -150,7 +154,7 @@ async function updateUser(req: customRequest, res: Response) {
     
 }
 
-async function deleteUser(req: any, res: any) {
+async function deleteUser(req: Request, res: Response) {
     await prisma.user.delete({
         where: { id: req.params.id },
     }).then((user) => {
@@ -160,22 +164,18 @@ async function deleteUser(req: any, res: any) {
     })
 }
 
-async function getUser(req: any, res: any) {
-    if (req.userId !== req.params.id) {
-        res.status(401).json("Unauthorized")
-        return
-    }
+async function getUser(req: customRequest, res: Response) {
     await prisma.user.findUnique({
-        where: { id: req.params.id },
+        where: { id: req.userId },
     }).then((user) => {
         res.json(user)
     }).catch((err) => {
-        res.json(err.message)
+        res.json(err)
     })
 }
 
 // TODO: Remove this api
-async function getAllUsers(req: any, res: any) {
+async function getAllUsers(req: Request, res: Response) {
     const users = await prisma.user.findMany()
     res.json(users)
 }
@@ -185,7 +185,7 @@ const restPasswordSchema = z.object({
     newPassword: z.string().min(8),
 })
 
-async function changePassword(req: any, res: any) {
+async function changePassword(req: customRequest, res: Response) {
     const result = restPasswordSchema.safeParse(req.body)
     if (!result.success) {
         res.status(400).json(result.error)
