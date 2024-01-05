@@ -20,20 +20,54 @@ app.get("/", (req, res) => {
     res.send("Hello World");
 });
 // User APIs
-app.post("/signup", user_api_1.createUser);
-app.post("/login", user_api_1.login);
-app.get("/user", utils_1.isAuthenticated, user_api_1.getUser);
-app.put("/user", utils_1.isAuthenticated, user_api_1.updateUser);
-app.delete("/user", utils_1.isAuthenticated, user_api_1.deleteUser);
-app.post("/change-password", utils_1.isAuthenticated, user_api_1.changePassword);
-app.get("/logout", utils_1.isAuthenticated, (req, res) => {
+app.post("/signup", (req, res) => {
+    (0, user_api_1.createUser)(req, res);
+});
+app.get("/login", (req, res) => {
+    (0, user_api_1.login)(req, res);
+});
+app.get("/user", utils_1.isAuthenticated, (req, res) => {
+    (0, user_api_1.getUser)(req, res);
+});
+app.put("/user", (req, res) => {
+    (0, user_api_1.updateUser)(req, res);
+});
+app.delete("/user", (req, res) => {
+    (0, user_api_1.deleteUser)(req, res);
+});
+app.get("/logout", (req, res) => {
     res.json({ message: "Logout Successful" });
 });
+app.post("/change-password", utils_1.isAuthenticated, (req, res) => {
+    (0, user_api_1.changePassword)(req, res);
+});
 // TODO: Remove this api
-app.get("/users", utils_1.isAuthenticated, user_api_1.getAllUsers);
+app.get("/users", (req, res) => {
+    (0, user_api_1.getAllUsers)(req, res);
+});
 // TODO List APIs
-app.post("/todo", utils_1.isAuthenticated, todo_api_1.addTask);
-app.put("/todo/:id", utils_1.isAuthenticated, todo_api_1.updateTask);
-app.get("/todo/:id", utils_1.isAuthenticated, todo_api_1.getTask);
-app.get("/todo", utils_1.isAuthenticated, todo_api_1.getAllUserTasks);
-app.delete("/todo/:id", utils_1.isAuthenticated, todo_api_1.deleteTask);
+app.post("/todo", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.addTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.put("/todo/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.updateTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.get("/todo/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.getTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.get("/todo", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.getAllUserTasks)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});
+app.delete("/todo/:id", utils_1.isAuthenticated, (req, res) => {
+    (0, todo_api_1.deleteTask)(req, res).catch((err) => {
+        res.json({ message: err.message });
+    });
+});

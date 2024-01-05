@@ -49,10 +49,6 @@ function addTask(req, res) {
             res.status(400).json(result.error);
             return;
         }
-        if (!req.userId) {
-            res.status(401).json({ message: "Unauthorized" });
-            return;
-        }
         yield prisma.todo.create({
             data: {
                 title: req.body.title,
@@ -62,7 +58,7 @@ function addTask(req, res) {
         }).then((task) => {
             res.json({ message: "Task Created Successfully", task: task });
         }).catch((err) => {
-            res.json({ message: err });
+            res.json({ message: err.message });
         });
     });
 }
