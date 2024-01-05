@@ -1,29 +1,18 @@
 import { PrismaClient } from '@prisma/client'
 import * as dotenv from 'dotenv'
 import { z } from 'zod'
-import { Request, Response } from 'express'
 
 dotenv.config()
 const prisma = new PrismaClient()
-
-interface customRequest extends Request {
-    userId?: string
-}
-
 const todoSchema = z.object({
     title: z.string().min(3),
     description: z.string().min(3),
 })
 
-async function addTask(req: customRequest, res: Response) {
+async function addTask(req: any, res: any) {
     const result = todoSchema.safeParse(req.body)
     if (!result.success) {
         res.status(400).json(result.error)
-        return
-    }
-
-    if (!req.userId) {
-        res.status(401).json({message: "Unauthorized"})
         return
     }
 
@@ -36,7 +25,7 @@ async function addTask(req: customRequest, res: Response) {
     }).then((task) => {
         res.json({message: "Task Created Successfully", task: task})
     }).catch((err) => {
-        res.json({message: err})
+        res.json({message: err.message})
     })
 }
 
@@ -44,7 +33,7 @@ const idSchema = z.object({
     id: z.string().min(36),
 })
 
-async function getTask(req: customRequest, res: Response) {
+async function getTask(req: any, res: any) {
     const result = idSchema.safeParse(req.params)
     if (!result.success) {
         res.status(400).json(result.error)
@@ -74,7 +63,7 @@ const updateTodoSchema = z.object({
     completed: z.boolean().optional(),
 })
 
-async function updateTask(req: customRequest, res: Response) {
+async function updateTask(req: any, res: any) {
     const result = updateTodoSchema.safeParse(req.body)
     if (!result.success) {
         res.status(400).json(result.error)
@@ -112,7 +101,7 @@ async function updateTask(req: customRequest, res: Response) {
     res.json({message: "Task Updated Successfully", task: currentTask})
 }
 
-async function getAllUserTasks(req: customRequest, res: Response) {
+async function getAllUserTasks(req: any, res: any) {
     const tasks = await prisma.todo.findMany({
         where: { userId: req.userId},
     }).then((tasks) => {
@@ -123,7 +112,7 @@ async function getAllUserTasks(req: customRequest, res: Response) {
     })
 }
 
-async function deleteTask(req: customRequest, res: Response) {
+async function deleteTask(req: any, res: any) {
     const result = idSchema.safeParse(req.params)
     if (!result.success) {
         res.status(400).json(result.error)
