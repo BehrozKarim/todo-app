@@ -26,19 +26,20 @@ async function createUser(req: Request, res: Response) {
         return
     }
 
-    let password_hash = await bcrypt.hash(req.body.password, 10)
+    let passwordHash = await bcrypt.hash(req.body.password, 10)
     if (await usernameExists(req.body.username)) {
         res.status(400).json(
             "Username already exists")
         return
     }
-    await prisma.user.create({
-        data: {
-            name: req.body.name,
-            username: req.body.username,
-            password: password_hash,
-        },
-    }).then(async (user) => {
+    try {
+        const user = await prisma.user.create({
+            data: {
+                name: req.body.name,
+                username: req.body.username,
+                password: passwordHash,
+            },
+        })
         const token = await createToken({id: user.id})
         res.json(
             {token: token,
@@ -48,9 +49,9 @@ async function createUser(req: Request, res: Response) {
             name: user.name},
             )
     }
-    ).catch((err) => {
-        res.json(err.message)
-    })
+    catch (err) {
+        res.status(400).json(err)
+    }
 }
 
 const loginSchema = z.object({
@@ -90,28 +91,65 @@ async function logout(req: Request, res: Response) {
     res.json("Logged out")
 }
 
-async function updateUser(req: Request, res: Response) {
-    let currentDetails = await prisma.user.findUnique({
-        where: { id: req.params.id },
-    }).catch((err) => {
-        res.json(err.message)
-    })
-    await prisma.user.update({
-        where: { id: req.params.id },
-        data: {
-            name: req.body.name? req.body.name : currentDetails?.name,
-            username: req.body.username? req.body.username : currentDetails?.username,
-        },
-    }).then((user) => {
-        res.json({
-            userId: user.id,
-            name: user.name,
-            username: user.username
-            })
-    }).
-    catch((err) => {
-        res.json(err.message)
-    })
+// attributes should be optional
+const updateUserSchema = z.object({
+    name: z.string().min(3).optional(),
+    username: z.string().min(3).optional(),
+})
+
+async function updateUser(req: customRequest, res: Response) {
+    const result = updateUserSchema.safeParse(req.body)
+    if (!result.success) {
+        res.status(400).json(result.error)
+        return
+    }
+
+    if (await usernameExists(req.body.username)) {
+        res.status(400).json(
+            "Username already exists")
+        return
+    }
+
+    // if request body is empty
+    if (Object.keys(req.body).length === 0) {
+        res.status(400).json("Empty request body")
+        return
+    }
+
+    try {
+        let currentUserDetails = await prisma.user.findUnique({
+            where: { id: req.userId },
+        })
+        if (!currentUserDetails) {
+            res.status(404).json({message: "User not found"})
+            return
+        }
+
+        currentUserDetails.name = req.body.name ? req.body.name : currentUserDetails.name
+        currentUserDetails.username = req.body.username ? req.body.username : currentUserDetails.username
+        currentUserDetails.updatedAt = new Date()
+        currentUserDetails = await prisma.user.update({
+            where: { id: req.userId },
+            data: {
+                name: currentUserDetails.name,
+                username: currentUserDetails.username,
+                updatedAt: currentUserDetails.updatedAt,
+            },
+        })
+        res.json(
+            {message: "User updated successfully",
+            userId: currentUserDetails.id,
+            username: currentUserDetails.username,
+            name: currentUserDetails.name},
+        )
+    }
+    catch (err) {
+        res.status(400).json(err)
+    }
+
+
+
+    
 }
 
 async function deleteUser(req: Request, res: Response) {
@@ -157,11 +195,11 @@ async function changePassword(req: customRequest, res: Response) {
     })
     if (user) {
         if (await bcrypt.compare(req.body.oldPassword, user.password)) {
-            const password_hash = await bcrypt.hash(req.body.newPassword, 10)
+            const passwordHash = await bcrypt.hash(req.body.newPassword, 10)
             await prisma.user.update({
                 where: { id: req.userId },
                 data: {
-                    password: password_hash,
+                    password: passwordHash,
                 },
             }).then((user) => {
                 res.json(
