@@ -2,8 +2,8 @@ import { PrismaClient } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
 import { usernameExists, createToken, emailExists } from '../utils/utils'
 import * as dotenv from 'dotenv'
-import { z } from 'zod'
 import { Request, Response } from 'express'
+import {signupSchema, loginSchema, updateUserSchema, restPasswordSchema} from '../utils/zod-schemas'
 dotenv.config()
 
 interface customRequest extends Request {
@@ -11,13 +11,6 @@ interface customRequest extends Request {
 }
 
 const prisma = new PrismaClient()
-
-const signupSchema = z.object({
-    name: z.string().min(3),
-    username: z.string().min(3),
-    password: z.string().min(8),
-    email: z.string().email(),
-})
 
 async function createUser(req: Request, res: Response) {
     const result = signupSchema.safeParse(req.body)
@@ -54,16 +47,6 @@ async function createUser(req: Request, res: Response) {
         res.status(400).json(err)
     }
 }
-
-const loginSchema = z.object({
-    username: z.string().min(3),
-    password: z.string().min(8),
-    email: z.string().email().optional(),
-}).or(z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
-    username: z.string().min(3).optional(),
-}))
 
 async function login(req: Request, res: Response) {
     const result = loginSchema.safeParse(req.body)
@@ -105,13 +88,6 @@ async function login(req: Request, res: Response) {
 async function logout(req: Request, res: Response) {
     res.json("Logged out")
 }
-
-// attributes should be optional
-const updateUserSchema = z.object({
-    name: z.string().min(3).optional(),
-    username: z.string().min(3).optional(),
-    email: z.string().email().optional(),
-})
 
 async function updateUser(req: customRequest, res: Response) {
     const result = updateUserSchema.safeParse(req.body)
@@ -221,11 +197,6 @@ async function getAllUsers(req: Request, res: Response) {
         })
     )
 }
-
-const restPasswordSchema = z.object({
-    oldPassword: z.string().min(8),
-    newPassword: z.string().min(8),
-})
 
 async function changePassword(req: customRequest, res: Response) {
     const result = restPasswordSchema.safeParse(req.body)
