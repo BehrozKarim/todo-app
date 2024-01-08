@@ -1,6 +1,7 @@
 import exp from 'constants'
 import { z } from 'zod'
 
+// User Schemas:
 const signupSchema = z.object({
     name: z.string().min(3),
     username: z.string().min(3),
@@ -29,4 +30,24 @@ const restPasswordSchema = z.object({
     newPassword: z.string().min(8),
 })
 
-export { signupSchema, loginSchema, updateUserSchema, restPasswordSchema }
+// Todo Schemas:
+const todoSchema = z.object({
+    title: z.string().min(3),
+    description: z.string().min(3),
+})
+
+const idSchema = z.object({
+    id: z.string().min(36),
+})
+
+const updateTodoSchema = z.object({
+    title: z.string().min(3).optional(),
+    description: z.string().min(3).optional(),
+    completed: z.boolean().optional(),
+})
+
+export {
+    signupSchema, loginSchema, updateUserSchema,
+    restPasswordSchema, todoSchema, idSchema,
+    updateTodoSchema 
+}
