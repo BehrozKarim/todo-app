@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createToken = exports.isAuthenticated = exports.usernameExists = void 0;
+exports.emailExists = exports.createToken = exports.isAuthenticated = exports.usernameExists = void 0;
 // validate username doesn't exist already
 const client_1 = require("@prisma/client");
 const jwt = __importStar(require("jsonwebtoken"));
@@ -51,6 +51,20 @@ function usernameExists(username) {
     });
 }
 exports.usernameExists = usernameExists;
+function emailExists(email) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const user = yield prisma.user.findUnique({
+            where: { email: email },
+        });
+        if (user) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    });
+}
+exports.emailExists = emailExists;
 function isAuthenticated(req, res, next) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {

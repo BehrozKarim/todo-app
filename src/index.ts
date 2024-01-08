@@ -15,9 +15,6 @@ app.listen(5000, () => {
     console.log("App running on 5000 port")
 })
 
-interface customRequest extends Request {
-    userId: string
-}
 
 app.get("/", (req, res) => {
     res.send("Hello World")

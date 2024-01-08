@@ -111,26 +111,26 @@ function updateTask(req, res) {
             res.status(400).json(idCheck.error);
             return;
         }
-        let current_task = yield prisma.todo.findUnique({
+        let currentTask = yield prisma.todo.findUnique({
             where: { id: req.params.id, userId: req.userId },
         }).catch((err) => {
             res.json({ message: err.message });
         });
-        if (!current_task) {
+        if (!currentTask) {
             res.status(404).json({ message: "Task not found" });
             return;
         }
-        current_task.completed = req.body.completed ? req.body.completed : current_task.completed;
-        current_task.title = req.body.title ? req.body.title : current_task.title;
-        current_task.description = req.body.description ? req.body.description : current_task.description;
-        current_task.updatedAt = new Date();
-        current_task = yield prisma.todo.update({
+        currentTask.completed = req.body.completed ? req.body.completed : currentTask.completed;
+        currentTask.title = req.body.title ? req.body.title : currentTask.title;
+        currentTask.description = req.body.description ? req.body.description : currentTask.description;
+        currentTask.updatedAt = new Date();
+        currentTask = yield prisma.todo.update({
             where: { id: req.params.id, },
-            data: current_task,
+            data: currentTask,
         }).catch((err) => {
             res.json({ message: err.message });
         });
-        res.json({ message: "Task Updated Successfully", task: current_task });
+        res.json({ message: "Task Updated Successfully", task: currentTask });
     });
 }
 exports.updateTask = updateTask;
