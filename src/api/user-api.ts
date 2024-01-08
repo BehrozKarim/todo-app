@@ -1,10 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 import * as bcrypt from 'bcrypt'
-import { usernameExists, createToken } from '../utils/utils'
-import * as jwt from 'jsonwebtoken'
+import { usernameExists, createToken, emailExists } from '../utils/utils'
 import * as dotenv from 'dotenv'
-import { z } from 'zod'
 import { Request, Response } from 'express'
+import {signupSchema, loginSchema, updateUserSchema, restPasswordSchema} from '../utils/zod-schemas'
 dotenv.config()
 
 interface customRequest extends Request {
@@ -12,12 +11,6 @@ interface customRequest extends Request {
 }
 
 const prisma = new PrismaClient()
-
-const signupSchema = z.object({
-    name: z.string().min(3),
-    username: z.string().min(3),
-    password: z.string().min(8),
-})
 
 async function createUser(req: Request, res: Response) {
     const result = signupSchema.safeParse(req.body)
@@ -38,6 +31,7 @@ async function createUser(req: Request, res: Response) {
                 name: req.body.name,
                 username: req.body.username,
                 password: passwordHash,
+                email: req.body.email,
             },
         })
         const token = await createToken({id: user.id})
@@ -54,11 +48,6 @@ async function createUser(req: Request, res: Response) {
     }
 }
 
-const loginSchema = z.object({
-    username: z.string().min(3),
-    password: z.string().min(8),
-})
-
 async function login(req: Request, res: Response) {
     const result = loginSchema.safeParse(req.body)
     if (!result.success) {
@@ -66,9 +55,18 @@ async function login(req: Request, res: Response) {
         return
     }
 
-    const user = await prisma.user.findUnique({
-        where: { username: req.body.username },
-    })
+    let user
+    if (req.body.username) {
+        user = await prisma.user.findUnique({
+            where: { username: req.body.username },
+        })
+    }
+    else if (req.body.email) {
+        user = await prisma.user.findUnique({
+            where: { email: req.body.email },
+        })
+    }
+
     if (user) {
         if (await bcrypt.compare(req.body.password, user.password)) {            
             const token = await createToken({id: user.id})
@@ -83,19 +81,13 @@ async function login(req: Request, res: Response) {
             res.status(400).json("Invalid Password")
         }
     } else {
-        res.status(400).json("Invalid Username")
+        res.status(400).json("Invalid Username or email")
     }
 }
 
 async function logout(req: Request, res: Response) {
     res.json("Logged out")
 }
-
-// attributes should be optional
-const updateUserSchema = z.object({
-    name: z.string().min(3).optional(),
-    username: z.string().min(3).optional(),
-})
 
 async function updateUser(req: customRequest, res: Response) {
     const result = updateUserSchema.safeParse(req.body)
@@ -104,7 +96,6 @@ async function updateUser(req: customRequest, res: Response) {
         return
     }
 
-    // if request body is empty
     if (Object.keys(req.body).length === 0) {
         res.status(400).json("Empty request body")
         return
@@ -129,6 +120,16 @@ async function updateUser(req: customRequest, res: Response) {
             }
         }
         currentUserDetails.username = req.body.username ? req.body.username : currentUserDetails.username
+
+        if (req.body.email) {
+            if (await emailExists(req.body.email)) {
+                res.status(400).json(
+                    "Email already exists")
+                return
+            }
+        }
+        currentUserDetails.email = req.body.email ? req.body.email : currentUserDetails.email
+
         currentUserDetails.updatedAt = new Date()
         currentUserDetails = await prisma.user.update({
             where: { id: req.userId },
@@ -136,13 +137,16 @@ async function updateUser(req: customRequest, res: Response) {
                 name: currentUserDetails.name,
                 username: currentUserDetails.username,
                 updatedAt: currentUserDetails.updatedAt,
+                email: currentUserDetails.email,
             },
         })
+
         res.json(
             {message: "User Details updated successfully",
             userId: currentUserDetails.id,
             username: currentUserDetails.username,
-            name: currentUserDetails.name},
+            name: currentUserDetails.name,
+            email: currentUserDetails.email,},
         )
     }
     catch (err) {
@@ -168,7 +172,12 @@ async function getUser(req: customRequest, res: Response) {
     await prisma.user.findUnique({
         where: { id: req.userId },
     }).then((user) => {
-        res.json(user)
+        res.json(
+            {userId: user?.id,
+            username: user?.username,
+            name: user?.name,
+            email: user?.email,}
+        )
     }).catch((err) => {
         res.json(err)
     })
@@ -177,13 +186,17 @@ async function getUser(req: customRequest, res: Response) {
 // TODO: Remove this api
 async function getAllUsers(req: Request, res: Response) {
     const users = await prisma.user.findMany()
-    res.json(users)
+    res.json(
+        users.map((user) => {
+            return {
+                userId: user.id,
+                username: user.username,
+                name: user.name,
+                email: user.email,
+            }
+        })
+    )
 }
-
-const restPasswordSchema = z.object({
-    oldPassword: z.string().min(8),
-    newPassword: z.string().min(8),
-})
 
 async function changePassword(req: customRequest, res: Response) {
     const result = restPasswordSchema.safeParse(req.body)

@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import * as dotenv from 'dotenv'
 import { z } from 'zod'
 import { Request, Response } from 'express'
+import { todoSchema, idSchema, updateTodoSchema } from '../utils/zod-schemas'
 
 dotenv.config()
 const prisma = new PrismaClient()
@@ -9,11 +10,6 @@ const prisma = new PrismaClient()
 interface customRequest extends Request {
     userId?: string
 }
-
-const todoSchema = z.object({
-    title: z.string().min(3),
-    description: z.string().min(3),
-})
 
 async function addTask(req: customRequest, res: Response) {
     const result = todoSchema.safeParse(req.body)
@@ -40,10 +36,6 @@ async function addTask(req: customRequest, res: Response) {
     })
 }
 
-const idSchema = z.object({
-    id: z.string().min(36),
-})
-
 async function getTask(req: customRequest, res: Response) {
     const result = idSchema.safeParse(req.params)
     if (!result.success) {
@@ -67,12 +59,6 @@ async function getTask(req: customRequest, res: Response) {
     })
 
 }
-
-const updateTodoSchema = z.object({
-    title: z.string().min(3).optional(),
-    description: z.string().min(3).optional(),
-    completed: z.boolean().optional(),
-})
 
 async function updateTask(req: customRequest, res: Response) {
     const result = updateTodoSchema.safeParse(req.body)

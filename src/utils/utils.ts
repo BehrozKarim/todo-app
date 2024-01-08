@@ -19,6 +19,17 @@ async function usernameExists(username: string) {
     }
 }
 
+async function emailExists(email: string) {
+    const user = await prisma.user.findUnique({
+        where: { email: email },
+    })
+    if (user) {
+        return true
+    } else {
+        return false
+    }
+}
+
 async function isAuthenticated(req: any, res: any, next: any) {
     
     // spliting to extract token only
@@ -52,4 +63,4 @@ async function createToken(user: User) {
 
 
 
-export { usernameExists, isAuthenticated, createToken }
+export { usernameExists, isAuthenticated, createToken, emailExists }
