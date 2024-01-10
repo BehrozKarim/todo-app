@@ -3,47 +3,15 @@ import * as bcrypt from 'bcrypt'
 import { usernameExists, createToken, emailExists } from '../utils/utils'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import { z } from 'zod'
-import {v4 as uuidv4} from 'uuid'
-
+import {signupSchema, loginSchema, updateUserSchema, restPasswordSchema} from '../utils/zod-schemas'
 dotenv.config()
 
 interface customRequest extends Request {
     userId?: string
 }
 
-// Zod Schemas
-const signupSchema = z.object({
-    name: z.string().min(3),
-    username: z.string().min(3),
-    password: z.string().min(8),
-    email: z.string().email(),
-})
-
-const loginSchema = z.object({
-    username: z.string().min(3),
-    password: z.string().min(8),
-    email: z.string().email().optional(),
-}).or(z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
-    username: z.string().min(3).optional(),
-}))
-
-const updateUserSchema = z.object({
-    name: z.string().min(3).optional(),
-    username: z.string().min(3).optional(),
-    email: z.string().email().optional(),
-})
-
-const restPasswordSchema = z.object({
-    oldPassword: z.string().min(8),
-    newPassword: z.string().min(8),
-})
-
 const prisma = new PrismaClient()
 
-// Controller Functions
 async function createUser(req: Request, res: Response) {
     const result = signupSchema.safeParse(req.body)
     if (!result.success) {
@@ -60,7 +28,6 @@ async function createUser(req: Request, res: Response) {
     try {
         const user = await prisma.user.create({
             data: {
-                id: uuidv4(),
                 name: req.body.name,
                 username: req.body.username,
                 password: passwordHash,
