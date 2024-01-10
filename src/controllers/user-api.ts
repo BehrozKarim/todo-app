@@ -4,6 +4,8 @@ import { usernameExists, createToken, emailExists } from '../utils/utils'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import { z } from 'zod'
+import {v4 as uuidv4} from 'uuid'
+
 dotenv.config()
 
 interface customRequest extends Request {
@@ -58,6 +60,7 @@ async function createUser(req: Request, res: Response) {
     try {
         const user = await prisma.user.create({
             data: {
+                id: uuidv4(),
                 name: req.body.name,
                 username: req.body.username,
                 password: passwordHash,
