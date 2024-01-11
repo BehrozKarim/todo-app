@@ -3,9 +3,7 @@ import * as dotenv from 'dotenv'
 import { date, z } from 'zod'
 import { Request, Response } from 'express'
 import {v4 as uuidv4} from 'uuid'
-import {
-    createTaskService, getTaskService, updateTaskService,
-    deleteTaskService, getAllUserTasksService } from '../services/todo-services'
+import  taskModel  from '../services/todo-services'
 
 
 dotenv.config()
@@ -51,7 +49,7 @@ async function createTask(req: customRequest, res: Response) {
         userId: req.userId,
     }
 
-    const task = await createTaskService(data)
+    const task = await taskModel.create(data)
     if (!task) {
         res.status(500).json({message: "Internal Server Error"})
         return
@@ -66,7 +64,7 @@ async function getTask(req: customRequest, res: Response) {
         return
     }
 
-    const task = await getTaskService(req.params.id)
+    const task = await taskModel.get(req.params.id)
     if (!task) {
         res.status(404).json({message: "Task not found"})
         return
@@ -88,7 +86,7 @@ async function updateTask(req: customRequest, res: Response) {
         return
     }
 
-    const task = await updateTaskService(req.params.id, req.body)
+    const task = await taskModel.update(req.params.id, req.body)
     if (!task) {
         res.status(404).json({message: "Unable to update the task"})
         return
@@ -103,7 +101,7 @@ async function getAllUserTasks(req: customRequest, res: Response) {
         res.status(401).json({message: "Unauthorized"})
         return
     }
-    const tasks = await getAllUserTasksService(req.userId)
+    const tasks = await taskModel.getAllUserTasks(req.userId)
     if (!tasks) {
         res.status(500).json({message: "Internal Server Error"})
         return
@@ -118,7 +116,7 @@ async function deleteTask(req: customRequest, res: Response) {
         return
     }
 
-    const task = await deleteTaskService(req.params.id)
+    const task = await taskModel.delete(req.params.id)
     if (!task) {
         res.status(404).json({message: "Unable to delete the task"})
         return
