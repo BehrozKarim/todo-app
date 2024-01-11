@@ -5,10 +5,7 @@ import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 import {v4 as uuidv4} from 'uuid'
-import {
-    createUserService, deleteUserService, getUserService,
-    updateUserService, loginService, changePasswordService
-} from '../services/user-services'
+import { userModel, loginService } from '../services/user-services'
 
 dotenv.config()
 
@@ -61,7 +58,7 @@ async function createUser(req: Request, res: Response) {
         return
     }
 
-    const user = await createUserService(req.body)
+    const user = await userModel.create(req.body)
     if (!user) {
         res.status(500).json({message: "Internal Server Error"})
         return
@@ -115,7 +112,7 @@ async function updateUser(req: customRequest, res: Response) {
         return
     } 
     if (req.userId){
-        const user = await updateUserService(req.userId, req.body)
+        const user = await userModel.update(req.body, req.userId)
         if (!user) {
             res.status(500).json({message: "Internal Server Error"})
             return
@@ -136,7 +133,7 @@ async function updateUser(req: customRequest, res: Response) {
 async function deleteUser(req: customRequest, res: Response) {
     
     if (req.userId){
-        const user = await deleteUserService(req.userId)
+        const user = await userModel.delete(req.userId)
         if (!user) {
             res.status(500).json({message: "Internal Server Error"})
             return
@@ -156,7 +153,7 @@ async function deleteUser(req: customRequest, res: Response) {
 
 async function getUser(req: customRequest, res: Response) {
     if (req.userId){
-        const user = await getUserService(req.userId)
+        const user = await userModel.findById(req.userId)
         if (!user) {
             res.status(500).json({message: "Internal Server Error"})
             return
@@ -197,7 +194,7 @@ async function changePassword(req: customRequest, res: Response) {
     }
 
     if (req.userId){
-        const user = await changePasswordService(req.userId, req.body)
+        const user = await userModel.changePassword(req.body, req.userId)
         if (!user) {
             res.status(500).json({message: "Internal Server Error"})
             return
