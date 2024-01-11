@@ -1,7 +1,7 @@
 import express from "express"
 import {createUser, getUser, deleteUser, getAllUsers, updateUser, login, changePassword} from "../controllers/user-api"
 import {isAuthenticated} from "../auth-middleware/middleware"
-import { addTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-api"
+import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-api"
 import exp from "constants"
 
 const router = express.Router()
@@ -31,7 +31,7 @@ router.get("/logout", isAuthenticated, (req, res) => {
 router.get("/users", isAuthenticated, getAllUsers)
 
 // TODO List APIs
-router.post("/todo", isAuthenticated, addTask)
+router.post("/todo", isAuthenticated, createTask)
 
 router.put("/todo/:id", isAuthenticated, updateTask)
 
