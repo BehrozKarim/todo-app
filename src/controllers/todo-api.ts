@@ -101,7 +101,10 @@ async function getAllUserTasks(req: customRequest, res: Response) {
         res.status(401).json({message: "Unauthorized"})
         return
     }
-    const tasks = await taskModel.getAllUserTasks(req.userId)
+    if (!req.query.page || parseInt(req.query.page as string) < 1) {
+        req.query.page = "1"
+    }
+    const tasks = await taskModel.getAllUserTasks(req.userId, parseInt(req.query.page as string))
     if (!tasks) {
         res.status(500).json({message: "Internal Server Error"})
         return
