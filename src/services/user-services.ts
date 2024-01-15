@@ -10,7 +10,7 @@ type userSignUpData = {
     name?: string,
     username: string,
     email: string,
-    password: string,
+    password?: string,
 }
 
 type updateData = {
@@ -29,7 +29,7 @@ type userData = {
     name: string | null,
     username: string,
     email: string,
-    password: string,
+    password: string | null,
     updatedAt: Date,
     createdAt: Date,
 }
@@ -78,7 +78,10 @@ class PrismaUser implements User {
 
 
     async create(data: userSignUpData): Promise<userData | null> {
-        const passwordHash = await bcrypt.hash(data.password, 10)
+        let passwordHash = null
+        if (data.password){
+            passwordHash = await bcrypt.hash(data.password, 10)
+        }
         const user = await prisma.user.create({
             data: {
                 id: uuidv4(),
@@ -143,9 +146,11 @@ class PrismaUser implements User {
         if (!user) {
             return null
         }
-        const passwordMatch = await bcrypt.compare(data.oldPassword, user.password)
-        if (!passwordMatch) {
-            return null
+        if (user.password){
+            const passwordMatch = await bcrypt.compare(data.oldPassword, user.password)
+            if (!passwordMatch) {
+                return null
+            }
         }
         const passwordHash = await bcrypt.hash(data.newPassword, 10)
         const updatedUser = await prisma.user.update({
@@ -177,7 +182,7 @@ async function loginService(password: string, username?: string, email?: string)
         user = await userModel.findByEmail(email)
     }
 
-    if (user) {
+    if (user && user.password) {
         if (await bcrypt.compare(password, user.password)) {            
             const token = await createToken({id: user.id})
             return token

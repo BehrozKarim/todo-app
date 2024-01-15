@@ -1,5 +1,7 @@
 import {google} from 'googleapis';
 import {Request, Response} from 'express';
+import { userModel } from '../services/user-services';
+import { createToken } from '../utils/utils';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -36,8 +38,35 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
                 version: 'v2',
             });
             const {data} = await oauth2.userinfo.get();
-            console.log(data);
-            res.send(data);
+            if (data.email && data.name ) {
+                const user = await userModel.findByEmail(data.email? data.email: '');
+                if (user) {
+                    const token = await createToken(user);
+                    res.send({
+                        token: token,
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                    });
+                }
+                else if (!user) {
+                    const newUser = await userModel.create({
+                        name: data.name,
+                        email: data.email,
+                        username: data.email,
+                        password: '',
+                    });
+                    if (newUser) {
+                        const token = await createToken(newUser);
+                        res.send({
+                            token: token,
+                            id: newUser.id,
+                            name: newUser.name,
+                            email: newUser.email,
+                        });
+                    }
+                }
+            }
         } catch (error) {
             console.log(error);
             res.send(error);
