@@ -2,9 +2,13 @@ import express from "express"
 import {createUser, getUser, deleteUser, getAllUsers, updateUser, login, changePassword} from "../controllers/user-api"
 import {isAuthenticated} from "../auth-middleware/middleware"
 import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-api"
+import { googleAuth, googleAuthCallback } from "../controllers/google-auth"
 import exp from "constants"
 
 const router = express.Router()
+
+router.get("/google-auth", googleAuth)
+router.get("/google/redirect", googleAuthCallback)
 
 router.get("/", (req, res) => {
     res.send("Hello World")
