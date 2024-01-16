@@ -1,5 +1,5 @@
 import express from "express"
-import {createUser, getUser, deleteUser, getAllUsers, updateUser, login, changePassword} from "../controllers/user-controller"
+import {createUser, getUser, deleteUser, updateUser, login, changePassword} from "../controllers/user-controller"
 import {isAuthenticated} from "../middlewares/auth-middleware"
 import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-controller"
 import { googleAuth, googleAuthCallback } from "../controllers/google-auth-controller"
@@ -30,9 +30,6 @@ router.post("/change-password", isAuthenticated, changePassword)
 router.get("/logout", isAuthenticated, (req, res) => {
     res.json({message: "Logout Successful"})
 })
-
-// TODO: Remove this api
-router.get("/users", isAuthenticated, getAllUsers)
 
 // TODO List APIs
 router.post("/todo", isAuthenticated, createTask)

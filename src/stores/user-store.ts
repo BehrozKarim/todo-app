@@ -19,11 +19,6 @@ type updateData = {
     email?: string,
 }
 
-type passwordData = {
-    oldPassword: string,
-    newPassword: string,
-}
-
 type userData = {
     userId: string,
     name: string | null,
@@ -42,7 +37,7 @@ interface User {
     create: (data: userSignUpData) => Promise<userData | null>,
     update: (data: updateData, userId: string) => Promise<userData | null>,
     delete: (userId: string) => Promise<userData | null>,
-    changePassword: (data: passwordData, userId: string) => Promise<userData | null>,
+    changePassword: (passwordHash: string, userId: string) => Promise<userData | null>,
 }
 
 class PrismaUser implements User {
@@ -98,31 +93,18 @@ class PrismaUser implements User {
     }
 
     async update(data: updateData, userId: string): Promise<userData | null> {
-        const currentUser = await prisma.user.findUnique({
-            where: { userId: userId},
-        }).catch((err) => {
-            console.log(err)
-            return null
-        })
-        if (!currentUser) {
-            return null
-        }
-
-        let name = data.name ? data.name : currentUser.name
-        let username = data.username ? data.username : currentUser.username
-        let email = data.email ? data.email : currentUser.email
-
         const user = await prisma.user.update({
-            where: { userId: currentUser.userId},
+            where: { userId: userId },
             data: {
-                name: name,
-                username: username,
-                email: email,
+                name: data.name,
+                username: data.username,
+                email: data.email,
             },
-        }).catch((err) => {
-            console.log(err)
-            return null
-        })
+            })
+            .catch((err) => {
+                console.log(err)
+                return null
+            })
         return user
     }
 
@@ -136,23 +118,7 @@ class PrismaUser implements User {
         return user
     }
 
-    async changePassword(data: passwordData, userId: string): Promise<userData | null> {
-        const user = await prisma.user.findUnique({
-            where: { userId: userId },
-        }).catch((err) => {
-            console.log(err)
-            return null
-        })
-        if (!user) {
-            return null
-        }
-        if (user.password){
-            const passwordMatch = await bcrypt.compare(data.oldPassword, user.password)
-            if (!passwordMatch) {
-                return null
-            }
-        }
-        const passwordHash = await bcrypt.hash(data.newPassword, 10)
+    async changePassword(passwordHash: string, userId: string): Promise<userData | null> {
         const updatedUser = await prisma.user.update({
             where: { userId: userId },
             data: {
@@ -169,29 +135,4 @@ class PrismaUser implements User {
 
 const userModel: User = new PrismaUser()
 
-async function loginService(password: string, username?: string, email?: string) {
-    if ((!username && !email) || !password ) {
-        return null
-    }
-
-    let user;
-    if (username) {
-        user = await userModel.findByUsername(username)
-    }
-    else if (email) {
-        user = await userModel.findByEmail(email)
-    }
-
-    if (user && user.password) {
-        if (await bcrypt.compare(password, user.password)) {            
-            const token = await createToken({userId: user.userId})
-            return token
-        } else {
-            return null
-        }
-    } else {
-        return null
-    }
-}
-
-export { userModel, loginService }
+export { userModel }

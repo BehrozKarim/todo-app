@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import  taskModel  from '../stores/todo-store'
-import { idSchema, todoSchema, updateTodoSchema } from '../validators/zod-schemas'
+import { idSchema, todoSchema, updateTodoSchema } from '../utils/zod-schemas'
 
 dotenv.config()
 
