@@ -1,10 +1,9 @@
 import express from "express"
-import {createUser, getUser, deleteUser, getAllUsers, updateUser, login, changePassword} from "../controllers/user-controller"
-import {isAuthenticated} from "../auth-middleware/middleware"
+import {createUser, getUser, deleteUser, updateUser, login, changePassword} from "../controllers/user-controller"
+import {isAuthenticated} from "../middlewares/auth-middleware"
 import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-controller"
-import { googleAuth, googleAuthCallback } from "../controllers/google-auth"
-import exp from "constants"
-
+import { googleAuth, googleAuthCallback } from "../controllers/google-auth-controller"
+import * as validate from "../middlewares/validate-middleware"
 const router = express.Router()
 
 router.get("/google-auth", googleAuth)
@@ -15,34 +14,31 @@ router.get("/", (req, res) => {
 })
 
 // User APIs
-router.post("/signup", createUser)
+router.post("/signup", validate.validateSignup, createUser)
 
-router.post("/login", login)
+router.post("/login", validate.validateLogin, login)
 
 router.get("/user", isAuthenticated, getUser)
 
-router.put("/user", isAuthenticated, updateUser)
+router.put("/user", isAuthenticated, validate.validateUpdateUser, updateUser)
 
 router.delete("/user", isAuthenticated, deleteUser)
 
-router.post("/change-password", isAuthenticated, changePassword)
+router.post("/change-password", isAuthenticated, validate.validateResetPassword, changePassword)
 
 router.get("/logout", isAuthenticated, (req, res) => {
     res.json({message: "Logout Successful"})
 })
 
-// TODO: Remove this api
-router.get("/users", isAuthenticated, getAllUsers)
-
 // TODO List APIs
-router.post("/todo", isAuthenticated, createTask)
+router.post("/todo", isAuthenticated, validate.validateTodoSchema, createTask)
 
-router.put("/todo/:id", isAuthenticated, updateTask)
+router.put("/todo/:id", isAuthenticated, validate.validateIdSchema, validate.validateUpdateTodoSchema, updateTask)
 
-router.get("/todo/:id", isAuthenticated, getTask)
+router.get("/todo/:id", isAuthenticated, validate.validateIdSchema, getTask)
 
-router.get("/todo", isAuthenticated, getAllUserTasks)
+router.get("/todo", isAuthenticated, validate.validateAllTasksQuery, getAllUserTasks)
 
-router.delete("/todo/:id", isAuthenticated, deleteTask)
+router.delete("/todo/:id", isAuthenticated, validate.validateIdSchema, deleteTask)
 
 export default router
