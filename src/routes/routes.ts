@@ -1,8 +1,8 @@
 import express from "express"
 import {createUser, getUser, deleteUser, getAllUsers, updateUser, login, changePassword} from "../controllers/user-controller"
-import {isAuthenticated} from "../auth-middleware/middleware"
+import {isAuthenticated} from "../middlewares/auth-middleware"
 import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-controller"
-import { googleAuth, googleAuthCallback } from "../controllers/google-auth"
+import { googleAuth, googleAuthCallback } from "../controllers/google-auth-controller"
 import exp from "constants"
 
 const router = express.Router()

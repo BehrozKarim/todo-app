@@ -1,35 +1,14 @@
-import { PrismaClient } from '@prisma/client'
 import * as dotenv from 'dotenv'
-import { date, z } from 'zod'
 import { Request, Response } from 'express'
 import  taskModel  from '../stores/todo-store'
-
+import { idSchema, todoSchema, updateTodoSchema } from '../validators/zod-schemas'
 
 dotenv.config()
-const prisma = new PrismaClient()
 
 interface customRequest extends Request {
     userId?: string
 }
-
-// Zod Schemas
-const todoSchema = z.object({
-    title: z.string().min(3),
-    description: z.string().min(3),
-})
-
-const idSchema = z.object({
-    id: z.string().min(36),
-})
-
-const updateTodoSchema = z.object({
-    title: z.string().min(3).optional(),
-    description: z.string().min(3).optional(),
-    completed: z.boolean().optional(),
-})
-
 // Controller Functions
-
 async function createTask(req: customRequest, res: Response) {
     const result = todoSchema.safeParse(req.body)
     if (!result.success) {

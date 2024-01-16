@@ -19,6 +19,7 @@ async function isAuthenticated(req: any, res: any, next: any) {
             res.status(401).json("Unauthorized")
         }
     }
+    next();
 }
 
 export { isAuthenticated }

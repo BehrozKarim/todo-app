@@ -1,44 +1,15 @@
 import { PrismaClient } from '@prisma/client'
-import { usernameExists, createToken, emailExists } from '../utils/utils'
+import { usernameExists, createToken } from '../utils/utils'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import { z } from 'zod'
 import { userModel, loginService } from '../stores/user-store'
-
+import { signupSchema, loginSchema, updateUserSchema, restPasswordSchema } from '../validators/zod-schemas'
 dotenv.config()
 
 interface customRequest extends Request {
     userId?: string
 }
-
-// Zod Schemas
-const signupSchema = z.object({
-    name: z.string().min(3),
-    username: z.string().min(3),
-    password: z.string().min(8),
-    email: z.string().email(),
-})
-
-const loginSchema = z.object({
-    username: z.string().min(3),
-    password: z.string().min(8),
-    email: z.string().email().optional(),
-}).or(z.object({
-    email: z.string().email(),
-    password: z.string().min(8),
-    username: z.string().min(3).optional(),
-}))
-
-const updateUserSchema = z.object({
-    name: z.string().min(3).optional(),
-    username: z.string().min(3).optional(),
-    email: z.string().email().optional(),
-})
-
-const restPasswordSchema = z.object({
-    oldPassword: z.string().min(8),
-    newPassword: z.string().min(8),
-})
 
 const prisma = new PrismaClient()
 
