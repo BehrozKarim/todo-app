@@ -1,7 +1,7 @@
 // validate username doesn't exist already
 import { PrismaClient } from '@prisma/client'
 import * as jwt from 'jsonwebtoken'
-import { userModel } from '../stores/user-store'
+import userModel from '../stores/user-store'
 
 const prisma = new PrismaClient()
 

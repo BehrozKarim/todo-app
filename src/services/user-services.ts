@@ -1,4 +1,4 @@
-import {userModel} from "../stores/user-store";
+import userModel from "../stores/user-store";
 import {createToken} from "../utils/utils";
 import {usernameExists, emailExists} from "../utils/utils";
 import * as bcrypt from 'bcrypt'
@@ -195,4 +195,7 @@ async function changePasswordService(oldPassword: string, newPassword: string, u
     }
 }
 
-export {createUserService, loginService, updateUserService, changePasswordService}
+export {
+    createUserService, loginService, updateUserService,
+    changePasswordService
+}

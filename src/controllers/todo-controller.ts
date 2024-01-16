@@ -71,4 +71,7 @@ async function deleteTask(req: customRequest, res: Response) {
     res.json({message: "Task Deleted Successfully", task: task})
 }
 
-export { createTask, getTask, getAllUserTasks, updateTask, deleteTask }
+export {
+    createTask, getTask, getAllUserTasks,
+    updateTask, deleteTask 
+}

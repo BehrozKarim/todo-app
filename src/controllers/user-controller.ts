@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import { userModel } from '../stores/user-store'
+import userModel from '../stores/user-store'
 import { createUserService, loginService, updateUserService, changePasswordService } from '../services/user-services'
 dotenv.config()
 
@@ -85,4 +85,7 @@ async function changePassword(req: customRequest, res: Response) {
     }
 }
 
-export {createUser, updateUser, deleteUser, getUser, login, logout, changePassword}
+export {
+    createUser, updateUser, deleteUser,
+    getUser, login, logout, changePassword
+}

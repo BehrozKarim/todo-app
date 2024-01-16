@@ -1,4 +1,9 @@
-import { signupSchema, idSchema, loginSchema, restPasswordSchema, todoSchema, updateTodoSchema, updateUserSchema } from "../utils/zod-schemas";
+import {
+    signupSchema, idSchema, loginSchema,
+    restPasswordSchema, todoSchema, updateTodoSchema,
+    updateUserSchema 
+} from "../utils/zod-schemas";
+
 import { NextFunction, Request, Response } from "express";
 
 async function validateSignup(req: Request, res: Response, next: NextFunction) {
@@ -76,4 +81,8 @@ async function validateAllTasksQuery(req: Request, res: Response, next: NextFunc
     next();
 }
 
-export { validateSignup, validateLogin, validateUpdateUser, validateResetPassword, validateTodoSchema, validateIdSchema, validateUpdateTodoSchema, validateAllTasksQuery }
+export {
+    validateSignup, validateLogin, validateUpdateUser,
+    validateResetPassword, validateTodoSchema, validateIdSchema,
+    validateUpdateTodoSchema, validateAllTasksQuery
+}

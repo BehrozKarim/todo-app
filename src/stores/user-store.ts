@@ -135,4 +135,4 @@ class PrismaUser implements User {
 
 const userModel: User = new PrismaUser()
 
-export { userModel }
+export default userModel
