@@ -29,7 +29,7 @@ interface Task {
     get: (id: string) => Promise<TaskData | null>,
     update: (id: string, data: updateData) => Promise<TaskData | null>,
     delete: (id: string) => Promise<TaskData | null>,
-    getAllUserTasks: (userId: string) => Promise<TaskData[] | null>,
+    getAllUserTasks: (userId: string, page: number) => Promise<TaskData[] | null>,
 }
 
 class PrismaTask implements Task{
@@ -100,9 +100,12 @@ class PrismaTask implements Task{
         return task
     }
 
-    async getAllUserTasks(userId: string): Promise<TaskData[] | null> {
+    async getAllUserTasks(userId: string, page: number): Promise<TaskData[] | null> {
         const tasks = await prisma.todo.findMany({
+            take: 10,
+            skip: (page - 1) * 10,
             where: { userId: userId },
+            orderBy: { createdAt: 'desc' },
         }).catch((err) => {
             console.log(err)
             return null
