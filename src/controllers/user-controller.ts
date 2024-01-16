@@ -1,11 +1,9 @@
 import { PrismaClient } from '@prisma/client'
-import * as bcrypt from 'bcrypt'
 import { usernameExists, createToken, emailExists } from '../utils/utils'
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import { z } from 'zod'
-import {v4 as uuidv4} from 'uuid'
-import { userModel, loginService } from '../services/user-services'
+import { userModel, loginService } from '../stores/user-store'
 
 dotenv.config()
 

@@ -2,8 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import * as dotenv from 'dotenv'
 import { date, z } from 'zod'
 import { Request, Response } from 'express'
-import {v4 as uuidv4} from 'uuid'
-import  taskModel  from '../services/todo-services'
+import  taskModel  from '../stores/todo-store'
 
 
 dotenv.config()

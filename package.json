@@ -8,7 +8,7 @@
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q public/src/index\""
   },
   "keywords": [],
-  "author": "",
+  "author": "Behroz Karim",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.7.1",

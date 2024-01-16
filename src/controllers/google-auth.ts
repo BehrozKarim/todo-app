@@ -1,6 +1,6 @@
 import {google} from 'googleapis';
 import {Request, Response} from 'express';
-import { userModel } from '../services/user-services';
+import { userModel } from '../stores/user-store';
 import { createToken } from '../utils/utils';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;

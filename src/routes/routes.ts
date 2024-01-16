@@ -1,7 +1,7 @@
 import express from "express"
-import {createUser, getUser, deleteUser, getAllUsers, updateUser, login, changePassword} from "../controllers/user-api"
+import {createUser, getUser, deleteUser, getAllUsers, updateUser, login, changePassword} from "../controllers/user-controller"
 import {isAuthenticated} from "../auth-middleware/middleware"
-import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-api"
+import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-controller"
 import { googleAuth, googleAuthCallback } from "../controllers/google-auth"
 import exp from "constants"
 
