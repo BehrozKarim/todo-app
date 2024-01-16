@@ -25,7 +25,7 @@ type passwordData = {
 }
 
 type userData = {
-    id: string,
+    userId: string,
     name: string | null,
     username: string,
     email: string,
@@ -48,7 +48,7 @@ interface User {
 class PrismaUser implements User {
     async findById(id: string): Promise<userData | null> {
         const user = await prisma.user.findUnique({
-            where: { id: id },
+            where: { userId: id },
         }).catch((err) => {
             console.log(err)
             return null
@@ -84,7 +84,7 @@ class PrismaUser implements User {
         }
         const user = await prisma.user.create({
             data: {
-                id: uuidv4(),
+                userId: uuidv4(),
                 name: data.name,
                 username: data.username,
                 email: data.email,
@@ -99,7 +99,7 @@ class PrismaUser implements User {
 
     async update(data: updateData, userId: string): Promise<userData | null> {
         const currentUser = await prisma.user.findUnique({
-            where: { id: userId},
+            where: { userId: userId},
         }).catch((err) => {
             console.log(err)
             return null
@@ -113,7 +113,7 @@ class PrismaUser implements User {
         let email = data.email ? data.email : currentUser.email
 
         const user = await prisma.user.update({
-            where: { id: currentUser.id},
+            where: { userId: currentUser.userId},
             data: {
                 name: name,
                 username: username,
@@ -128,7 +128,7 @@ class PrismaUser implements User {
 
     async delete(userId: string): Promise<userData | null> {
         const user = await prisma.user.delete({
-            where: { id: userId },
+            where: { userId: userId },
         }).catch((err) => {
             console.log(err)
             return null
@@ -138,7 +138,7 @@ class PrismaUser implements User {
 
     async changePassword(data: passwordData, userId: string): Promise<userData | null> {
         const user = await prisma.user.findUnique({
-            where: { id: userId },
+            where: { userId: userId },
         }).catch((err) => {
             console.log(err)
             return null
@@ -154,7 +154,7 @@ class PrismaUser implements User {
         }
         const passwordHash = await bcrypt.hash(data.newPassword, 10)
         const updatedUser = await prisma.user.update({
-            where: { id: userId },
+            where: { userId: userId },
             data: {
                 password: passwordHash,
             },
@@ -184,7 +184,7 @@ async function loginService(password: string, username?: string, email?: string)
 
     if (user && user.password) {
         if (await bcrypt.compare(password, user.password)) {            
-            const token = await createToken({id: user.id})
+            const token = await createToken({userId: user.userId})
             return token
         } else {
             return null

@@ -62,12 +62,12 @@ async function createUser(req: Request, res: Response) {
         return
     }
 
-    const token = await createToken({id: user.id})
+    const token = await createToken({userId: user.userId})
     res.json({
         message: "User Created Successfully",
         token: token,
         expiresIn: '1d',
-        userId: user.id,
+        userId: user.userId,
         username: user.username,
         name: user.name
     })
@@ -117,7 +117,7 @@ async function updateUser(req: customRequest, res: Response) {
         }
         res.json({
             message: "User Updated Successfully",
-            userId: user.id,
+            userId: user.userId,
             username: user.username,
             name: user.name,
             email: user.email,
@@ -138,7 +138,7 @@ async function deleteUser(req: customRequest, res: Response) {
         }
         res.json({
             message: "User Deleted Successfully",
-            userId: user.id,
+            userId: user.userId,
             username: user.username,
             name: user.name,
             email: user.email,
@@ -158,7 +158,7 @@ async function getUser(req: customRequest, res: Response) {
         }
         res.json({
             message: "User Details Fetched Successfully",
-            userId: user.id,
+            userId: user.userId,
             username: user.username,
             name: user.name,
             email: user.email,
@@ -175,7 +175,7 @@ async function getAllUsers(req: Request, res: Response) {
     res.json(
         users.map((user) => {
             return {
-                userId: user.id,
+                userId: user.userId,
                 username: user.username,
                 name: user.name,
                 email: user.email,
@@ -199,7 +199,7 @@ async function changePassword(req: customRequest, res: Response) {
         }
         res.json({
             message: "Password Changed Successfully",
-            userId: user.id,
+            userId: user.userId,
             username: user.username,
             name: user.name,
             email: user.email,

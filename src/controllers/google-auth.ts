@@ -44,7 +44,7 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
                     const token = await createToken(user);
                     res.send({
                         token: token,
-                        id: user.id,
+                        id: user.userId,
                         name: user.name,
                         email: user.email,
                     });
@@ -60,7 +60,7 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
                         const token = await createToken(newUser);
                         res.send({
                             token: token,
-                            id: newUser.id,
+                            id: newUser.userId,
                             name: newUser.name,
                             email: newUser.email,
                         });

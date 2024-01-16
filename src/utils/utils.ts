@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken'
 const prisma = new PrismaClient()
 
 type User = {
-    id: string,
+    userId: string,
 }
 
 async function usernameExists(username: string) {
@@ -32,7 +32,7 @@ async function emailExists(email: string) {
 
 async function createToken(user: User) {
     const token = jwt.sign(
-        { id: user.id},
+        { id: user.userId},
         process.env.JWT_SECRET as string, 
         {expiresIn: '1d',}
         )
