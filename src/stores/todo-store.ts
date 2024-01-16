@@ -9,6 +9,7 @@ type TaskCreationData = {
 }
 
 type updateData = {
+    id: string,
     title?: string,
     description?: string,
     completed?: boolean,
@@ -27,7 +28,7 @@ type TaskData = {
 interface Task {
     create: (data: TaskCreationData) => Promise<TaskData | null>,
     get: (id: string) => Promise<TaskData | null>,
-    update: (id: string, data: updateData) => Promise<TaskData | null>,
+    update: (data: updateData) => Promise<TaskData | null>,
     delete: (id: string) => Promise<TaskData | null>,
     getAllUserTasks: (userId: string, page: number) => Promise<TaskData[] | null>,
 }
@@ -58,28 +59,13 @@ class PrismaTask implements Task{
         return task
     }
 
-    async update(id: string, data: updateData): Promise<TaskData | null> {
-        const currentTask = await prisma.todo.findUnique({
-            where: { id: id },
-        }).catch((err) => {
-            console.log(err)
-            return null
-        }
-        )
-        if (!currentTask) {
-            return null
-        }
-
-        let title = data.title ? data.title : currentTask.title
-        let description = data.description ? data.description : currentTask.description
-        let completed = data.completed ? data.completed : currentTask.completed
-
+    async update(data: updateData): Promise<TaskData | null> {
         const task = await prisma.todo.update({
-            where: { id: id },
+            where: { id: data.id },
             data: {
-                title: title,
-                description: description,
-                completed: completed,
+                title: data.title,
+                description: data.description,
+                completed: data.completed,
             },
         }).catch((err) => {
             console.log(err)
@@ -115,6 +101,6 @@ class PrismaTask implements Task{
     }
 }
 
-const taskModel = new PrismaTask()
+const taskModel :Task = new PrismaTask()
 
 export default taskModel

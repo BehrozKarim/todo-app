@@ -1,6 +1,10 @@
 import jwt from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
+interface customRequest extends Request {
+    userId?: string
+}
 
-async function isAuthenticated(req: any, res: any, next: any) {
+async function isAuthenticated(req: customRequest, res: any, next: NextFunction) {
     
     // spliting to extract token only
     const token = req.headers.authorization?.split(" ")[1]
@@ -19,7 +23,6 @@ async function isAuthenticated(req: any, res: any, next: any) {
             res.status(401).json("Unauthorized")
         }
     }
-    next();
 }
 
 export { isAuthenticated }
