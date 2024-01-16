@@ -1,7 +1,6 @@
 import {google} from 'googleapis';
-import {Request, Response} from 'express';
-import userModel from '../stores/user-store';
-import { createToken } from '../utils/utils';
+import {Request, Response, response} from 'express';
+import {googleAuthCallbackService} from '../services/google-auth-service';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -30,46 +29,10 @@ export const googleAuth = (req: Request, res: Response) => {
 export const googleAuthCallback = async (req: Request, res: Response) => {
     const {code} = req.query;
     if (code) {
-        try {
-            const {tokens} = await oAuth2Client.getToken(code.toString());
-            oAuth2Client.setCredentials(tokens);
-            const oauth2 = google.oauth2({
-                auth: oAuth2Client,
-                version: 'v2',
-            });
-            const {data} = await oauth2.userinfo.get();
-            if (data.email && data.name ) {
-                const user = await userModel.findByEmail(data.email? data.email: '');
-                if (user) {
-                    const token = await createToken(user);
-                    res.send({
-                        token: token,
-                        id: user.userId,
-                        name: user.name,
-                        email: user.email,
-                    });
-                }
-                else if (!user) {
-                    const newUser = await userModel.create({
-                        name: data.name,
-                        email: data.email,
-                        username: data.email,
-                        password: '',
-                    });
-                    if (newUser) {
-                        const token = await createToken(newUser);
-                        res.send({
-                            token: token,
-                            id: newUser.userId,
-                            name: newUser.name,
-                            email: newUser.email,
-                        });
-                    }
-                }
-            }
-        } catch (error) {
-            console.log(error);
-            res.send(error);
-        }
+        const response = await googleAuthCallbackService(code.toString())
+        if (response)
+            res.status(response.status).json(response);
+        else
+            res.status(500).json({message: "Internal Server Error"})
     }
 }
