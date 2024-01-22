@@ -1,9 +1,9 @@
 import express from "express"
 import {createUser, getUser, deleteUser, updateUser, login, changePassword} from "../controllers/user-controller"
-import {isAuthenticated} from "../../middlewares/auth-middleware"
+import {isAuthenticated} from "../middlewares/auth-middleware"
 import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-controller"
 import { googleAuth, googleAuthCallback } from "../controllers/google-auth-controller"
-import * as validate from "../../middlewares/validate-middleware"
+import * as validate from "../middlewares/validate-middleware"
 const router = express.Router()
 
 router.get("/google-auth", googleAuth)
