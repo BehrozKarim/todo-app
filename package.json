@@ -2,10 +2,11 @@
   "name": "todo-app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "www.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q public/src/index\""
+    "dev": "concurrently \"npx tsc --watch\" \"nodemon -q public/bin/www\"",
+    "build": "tsc"
   },
   "keywords": [],
   "author": "Behroz Karim",
