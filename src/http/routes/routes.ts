@@ -4,6 +4,7 @@ import {isAuthenticated} from "../middlewares/auth-middleware"
 import { createTask, deleteTask, getAllUserTasks, getTask, updateTask } from "../controllers/todo-controller"
 import { googleAuth, googleAuthCallback } from "../controllers/google-auth-controller"
 import * as validate from "../middlewares/validate-middleware"
+import logger from "../middlewares/logger-middleware"
 const router = express.Router()
 
 router.get("/google-auth", googleAuth)
@@ -16,7 +17,7 @@ router.get("/", (req, res) => {
 // User APIs
 router.post("/signup", validate.validateSignup, createUser)
 
-router.post("/login", validate.validateLogin, login)
+router.post("/login", logger, validate.validateLogin, login)
 
 router.get("/user", isAuthenticated, getUser)
 

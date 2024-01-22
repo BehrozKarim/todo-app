@@ -1,11 +1,6 @@
-import express, { Express } from "express";
-import bodyParser from 'body-parser'
 import dotenv from "dotenv"
-
-const app: Express = express()
+import app from "../src/http/bootstrap"
 dotenv.config()
-app.use(bodyParser.json({limit: "100mb"}))
-app.use(bodyParser.urlencoded({limit:"50mb", extended: true}))
 
 const port = process.env.PORT || 5000
 
