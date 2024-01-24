@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import userModel from '../../stores/user-store'
-import { createUserService, loginService, updateUserService, changePasswordService } from '../../services/user-services'
+import userModel from '../../domain/stores/user-store'
+import { createUserService, loginService, updateUserService, changePasswordService } from '../../domain/services/user-services'
 dotenv.config()
 
 interface customRequest extends Request {
