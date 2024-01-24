@@ -1,6 +1,6 @@
 import {google} from 'googleapis';
 import {Request, Response, response} from 'express';
-import {googleAuthCallbackService} from '../services/google-auth-service';
+import {googleAuthCallbackService} from '../../services/google-auth-service';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;

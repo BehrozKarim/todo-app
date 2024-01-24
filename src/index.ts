@@ -1,7 +1,7 @@
 import express, { Express } from "express";
 import bodyParser from 'body-parser'
 import dotenv from "dotenv"
-import router from "./routes/routes"
+import router from "./http/routes/routes"
 
 const app: Express = express()
 dotenv.config()

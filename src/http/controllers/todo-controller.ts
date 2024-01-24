@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import  taskModel  from '../stores/todo-store'
-import { updateTaskService } from '../services/todo-services'
+import  taskModel  from '../../stores/todo-store'
+import { updateTaskService } from '../../services/todo-services'
 dotenv.config()
 
 interface customRequest extends Request {
