@@ -58,4 +58,8 @@ export const googleAuthCallbackService = async (code: string) => {
             };
         }
     }
+    return {
+        message: 'Invalid Request',
+        status: 400,
+    };
 }
