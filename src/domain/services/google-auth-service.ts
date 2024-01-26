@@ -1,6 +1,6 @@
 import {google} from 'googleapis';
 import {Request, Response} from 'express';
-import userModel from '../stores/user-store';
+import {userModel} from '../stores/user-store';
 import { createToken } from '../../utils/utils';
 
 const oAuth2Client = new google.auth.OAuth2(

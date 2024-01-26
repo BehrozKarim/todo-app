@@ -1,4 +1,4 @@
-import taskModel from "../stores/todo-store"
+import {taskModel} from "../stores/todo-store"
 
 type TaskUpdateData = {
     title?: string,

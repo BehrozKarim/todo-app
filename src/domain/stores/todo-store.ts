@@ -103,4 +103,4 @@ class PrismaTask implements Task{
 
 const taskModel :Task = new PrismaTask()
 
-export default taskModel
+export {taskModel, Task}
