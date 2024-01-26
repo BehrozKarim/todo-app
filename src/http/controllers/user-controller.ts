@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import { User, userModel} from '../../domain/stores/user-store'
-import { createUserService, loginService, updateUserService, changePasswordService } from '../../domain/services/user-services'
+import {userService, UserServiceInterface } from '../../domain/services/user-service'
 dotenv.config()
 
 interface customRequest extends Request {
@@ -20,17 +20,20 @@ interface UserControllerInterface {
 
 class UserController implements UserControllerInterface {
     private model: User
-    constructor(model: User) {
+    private service: UserServiceInterface
+
+    constructor(model: User, service: UserServiceInterface) {
         this.model = model
+        this.service = service
     }
 
     async createUser(req: Request, res: Response) {
-        const response = await createUserService(req.body)
+        const response = await this.service.create(req.body)
         res.status(response.status).json(response)
     }
 
     async login(req: Request, res: Response) {
-        const response = await loginService(req.body.password, req.body.username, req.body.email)
+        const response = await this.service.login(req.body.username, req.body.password, req.body.email)
         res.status(response.status).json(response)
     }
 
@@ -41,7 +44,7 @@ class UserController implements UserControllerInterface {
     async updateUser(req: customRequest, res: Response) {
 
         if (req.userId){
-            const response = await updateUserService(req.body, req.userId)
+            const response = await this.service.update(req.body, req.userId)
             res.status(response.status).json(response)
         }
         else {
@@ -92,7 +95,7 @@ class UserController implements UserControllerInterface {
 
     async changePassword(req: customRequest, res: Response) {
         if (req.userId){
-            const response = await changePasswordService(req.body.oldPassword, req.body.newPassword, req.userId)
+            const response = await this.service.changePassword(req.body.oldPassword, req.body.newPassword, req.userId)
             res.status(response.status).json(response)
         }
         else {
@@ -102,5 +105,5 @@ class UserController implements UserControllerInterface {
 }
 
 // export {UserController, UserControllerInterface}
-const controller : UserControllerInterface = new UserController(userModel)
+const controller : UserControllerInterface = new UserController(userModel, userService)
 export default controller

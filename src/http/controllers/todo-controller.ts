@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import  {Task, taskModel}  from '../../domain/stores/todo-store'
-import { updateTaskService } from '../../domain/services/todo-services'
+import { taskService, TaskServiceInterface } from '../../domain/services/todo-service'
 dotenv.config()
 
 interface customRequest extends Request {
@@ -18,8 +18,10 @@ interface TodoControllerInterface {
 
 class TodoController {
     private model: Task
-    constructor(model: Task) {
+    private service: TaskServiceInterface
+    constructor(model: Task, service: TaskServiceInterface) {
         this.model = model
+        this.service = service
     }
 
     async createTask(req: customRequest, res: Response) {
@@ -57,7 +59,7 @@ class TodoController {
             res.status(401).json({message: "Unauthorized"})
             return
         }
-        const response = await updateTaskService(req.body, req.params.id, req.userId)
+        const response = await this.service.update(req.body, req.params.id, req.userId)
         res.status(response.status).json(response)
     }
 
@@ -88,5 +90,5 @@ class TodoController {
 
 // export { TodoController, TodoControllerInterface }
 
-const controller : TodoControllerInterface = new TodoController(taskModel)
+const controller : TodoControllerInterface = new TodoController(taskModel, taskService)
 export default controller
