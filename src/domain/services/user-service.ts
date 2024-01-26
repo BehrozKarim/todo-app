@@ -32,9 +32,11 @@ interface UserServiceInterface {
     login: (username: string, password: string, email: string) => Promise<userReturnData | errorData>,
     update: (data: userData, userId: string) => Promise<userReturnData | errorData>,
     changePassword: (oldPassword: string, newPassword: string, userId: string) => Promise<userReturnData | errorData>,
+    delete: (userId: string) => Promise<userReturnData | errorData>,
+    get: (userId: string) => Promise<userReturnData | errorData>,
 }
 
-class UserService{
+class UserService implements UserServiceInterface{
     private model: User
     constructor(model: User) {
         this.model = model
@@ -191,6 +193,44 @@ class UserService{
                 message: "Invalid Credentials",
                 status: 400,
             }
+        }
+    }
+
+    async delete(userId: string): Promise<userReturnData | errorData>{
+
+        const user = await userModel.delete(userId)
+        if (!user) {
+            return {
+                message: "Internal Server Error",
+                status: 500,
+            }
+        }
+        return {
+            message: "User Deleted Successfully",
+            userId: user.userId,
+            username: user.username,
+            name: user.name,
+            email: user.email,
+            status: 200,
+        }
+    }
+
+    async get(userId: string): Promise<userReturnData | errorData>{
+
+        const user = await userModel.findById(userId)
+        if (!user) {
+            return {
+                message: "Internal Server Error",
+                status: 500,
+            }
+        }
+        return {
+            message: "User Details Fetched Successfully",
+            userId: user.userId,
+            username: user.username,
+            name: user.name,
+            email: user.email,
+            status: 200,
         }
     }
 

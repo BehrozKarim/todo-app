@@ -17,40 +17,29 @@ interface TodoControllerInterface {
 }
 
 class TodoController {
-    private model: Task
     private service: TaskServiceInterface
-    constructor(model: Task, service: TaskServiceInterface) {
-        this.model = model
+    constructor(service: TaskServiceInterface) {
         this.service = service
     }
 
     async createTask(req: customRequest, res: Response) {
-        if (!req.userId) {
-            res.status(401).json({message: "Unauthorized"})
-            return
+        if (req.userId){
+            const response = await this.service.create(req.body, req.userId)
+            res.status(response.status).json(response)
         }
-
-        const data = {
-            title: req.body.title,
-            description: req.body.description,
-            userId: req.userId,
+        else {
+            res.status(400).json("Invalid Request")
         }
-
-        const task = await this.model.create(data)
-        if (!task) {
-            res.status(500).json({message: "Internal Server Error"})
-            return
-        }
-        res.json({message: "Task Created Successfully", task: task})
     }
 
     async getTask(req: customRequest, res: Response) {
-        const task = await this.model.get(req.params.id)
-        if (!task) {
-            res.status(404).json({message: "Task not found"})
-            return
+        if (req.userId){
+            const response = await this.service.get(req.params.id, req.userId)
+            res.status(response.status).json(response)
         }
-        res.json({message: "Task Fetched Successfully", task: task})
+        else {
+            res.status(400).json("Invalid Request")
+        }
 
     }
 
@@ -64,31 +53,23 @@ class TodoController {
     }
 
     async getAllUserTasks(req: customRequest, res: Response) {
-        if (!req.userId) {
-            res.status(401).json({message: "Unauthorized"})
-            return
+        if (req.userId){
+            const response = await this.service.getAllUserTasks(req.userId, Number(req.query.page))
+            res.json(response)
         }
-
-        const tasks = await this.model.getAllUserTasks(req.userId, parseInt(req.query.page as string))
-        if (!tasks) {
-            res.status(500).json({message: "Internal Server Error"})
-            return
-        }
-        res.json({message: "Tasks Fetched Successfully", tasks: tasks})
     }
 
     async deleteTask(req: customRequest, res: Response) {
-        const task = await this.model.delete(req.params.id)
-        if (!task) {
-            res.status(404).json({message: "Unable to delete the task"})
-            return
+        if (req.userId){
+            const response = await this.service.delete(req.params.id, req.userId)
+            res.status(response.status).json(response)
         }
-        res.json({message: "Task Deleted Successfully", task: task})
+        else {
+            res.status(400).json("Invalid Request")
+        }
     }
     
 }
 
-// export { TodoController, TodoControllerInterface }
-
-const controller : TodoControllerInterface = new TodoController(taskModel, taskService)
+const controller : TodoControllerInterface = new TodoController(taskService)
 export default controller

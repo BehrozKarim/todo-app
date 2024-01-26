@@ -1,6 +1,5 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import { User, userModel} from '../../domain/stores/user-store'
 import {userService, UserServiceInterface } from '../../domain/services/user-service'
 dotenv.config()
 
@@ -19,11 +18,9 @@ interface UserControllerInterface {
 }
 
 class UserController implements UserControllerInterface {
-    private model: User
     private service: UserServiceInterface
 
-    constructor(model: User, service: UserServiceInterface) {
-        this.model = model
+    constructor(service: UserServiceInterface) {
         this.service = service
     }
 
@@ -53,20 +50,9 @@ class UserController implements UserControllerInterface {
     }
 
     async deleteUser(req: customRequest, res: Response) {
-        
         if (req.userId){
-            const user = await this.model.delete(req.userId)
-            if (!user) {
-                res.status(500).json({message: "Internal Server Error"})
-                return
-            }
-            res.json({
-                message: "User Deleted Successfully",
-                userId: user.userId,
-                username: user.username,
-                name: user.name,
-                email: user.email,
-            })
+            const response = await this.service.delete(req.userId)
+            res.status(response.status).json(response)
         }
         else {
             res.status(400).json("Invalid Request")
@@ -75,18 +61,8 @@ class UserController implements UserControllerInterface {
 
     async getUser(req: customRequest, res: Response) {
         if (req.userId){
-            const user = await this.model.findById(req.userId)
-            if (!user) {
-                res.status(500).json({message: "Internal Server Error"})
-                return
-            }
-            res.json({
-                message: "User Details Fetched Successfully",
-                userId: user.userId,
-                username: user.username,
-                name: user.name,
-                email: user.email,
-            })
+            const response = await this.service.get(req.userId)
+            res.status(response.status).json(response)
         }
         else {
             res.status(400).json("Invalid Request")
@@ -104,6 +80,5 @@ class UserController implements UserControllerInterface {
     }
 }
 
-// export {UserController, UserControllerInterface}
-const controller : UserControllerInterface = new UserController(userModel, userService)
+const controller : UserControllerInterface = new UserController(userService)
 export default controller
