@@ -1,34 +1,15 @@
 import {google} from 'googleapis';
 import {Request, Response} from 'express';
-import { userModel } from '../services/user-services';
+import userModel from '../stores/user-store';
 import { createToken } from '../utils/utils';
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URL;
-
 const oAuth2Client = new google.auth.OAuth2(
-    CLIENT_ID,
-    CLIENT_SECRET,
-    REDIRECT_URI
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URL
 );
 
-const SCOPES = [
-    'https://www.googleapis.com/auth/userinfo.profile',
-    'https://www.googleapis.com/auth/userinfo.email',
-];
-
-export const googleAuth = (req: Request, res: Response) => {
-    const authUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-    });
-    console.log(authUrl);
-    res.redirect(authUrl);
-};
-
-export const googleAuthCallback = async (req: Request, res: Response) => {
-    const {code} = req.query;
+export const googleAuthCallbackService = async (code: string) => {
     if (code) {
         try {
             const {tokens} = await oAuth2Client.getToken(code.toString());
@@ -42,12 +23,13 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
                 const user = await userModel.findByEmail(data.email? data.email: '');
                 if (user) {
                     const token = await createToken(user);
-                    res.send({
+                    return {
+                        status: 200,
                         token: token,
-                        id: user.id,
+                        id: user.userId,
                         name: user.name,
                         email: user.email,
-                    });
+                    };
                 }
                 else if (!user) {
                     const newUser = await userModel.create({
@@ -58,18 +40,22 @@ export const googleAuthCallback = async (req: Request, res: Response) => {
                     });
                     if (newUser) {
                         const token = await createToken(newUser);
-                        res.send({
+                        return {
+                            status: 201,
                             token: token,
-                            id: newUser.id,
+                            id: newUser.userId,
                             name: newUser.name,
                             email: newUser.email,
-                        });
+                        };
                     }
                 }
             }
         } catch (error) {
             console.log(error);
-            res.send(error);
+            return {
+                message: 'Internal Server Error',
+                status: 500,
+            };
         }
     }
 }
