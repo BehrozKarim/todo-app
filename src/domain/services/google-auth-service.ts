@@ -1,7 +1,7 @@
 import {google} from 'googleapis';
 import {Request, Response} from 'express';
-import userModel from '../stores/user-store';
-import { createToken } from '../utils/utils';
+import {userModel} from '../stores/user-store';
+import { createToken } from '../../utils/utils';
 
 const oAuth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -58,4 +58,8 @@ export const googleAuthCallbackService = async (code: string) => {
             };
         }
     }
+    return {
+        message: 'Invalid Request',
+        status: 400,
+    };
 }
