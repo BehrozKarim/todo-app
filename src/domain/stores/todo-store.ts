@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import {v4 as uuidv4} from 'uuid'
 const prisma = new PrismaClient()
+import logger from '../../shared/logger'
 
 type TaskCreationData = {
     title: string,
@@ -43,7 +44,8 @@ class PrismaTask implements Task{
                 userId: data.userId,
             },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         })
         return task
@@ -53,7 +55,8 @@ class PrismaTask implements Task{
         const task = await prisma.todo.findUnique({
             where: { id: id },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         })
         return task
@@ -68,7 +71,8 @@ class PrismaTask implements Task{
                 completed: data.completed,
             },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         }
         )
@@ -79,7 +83,8 @@ class PrismaTask implements Task{
         const task = await prisma.todo.delete({
             where: { id: id },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         }
         )
@@ -93,7 +98,8 @@ class PrismaTask implements Task{
             where: { userId: userId },
             orderBy: { createdAt: 'desc' },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         }
         )

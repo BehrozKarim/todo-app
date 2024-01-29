@@ -1,5 +1,4 @@
 import pino from "pino";
-import PinoPretty from "pino-pretty";
 
 export interface Logger {
     info: (message: string) => void;
@@ -29,4 +28,12 @@ export class PinoLogger implements Logger {
     debug(message: string): void {
         this.logger.debug(message);
     }
+
+    async logRequest(req: any, res: any, next: any) {
+        this.logger.info(`${req.method} ${req.path}`);
+        next();
+    }
 }
+
+const logger = new PinoLogger();
+export default logger;
