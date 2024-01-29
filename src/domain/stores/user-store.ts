@@ -2,6 +2,7 @@ import { PrismaClient} from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import * as bcrypt from "bcrypt";
 import { createToken } from "../../utils/utils";
+import logger from "../../shared/logger";
 
 const prisma = new PrismaClient();
 
@@ -45,7 +46,8 @@ class PrismaUser implements User {
         const user = await prisma.user.findUnique({
             where: { userId: id },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         })
         return user
@@ -55,7 +57,8 @@ class PrismaUser implements User {
         const user = await prisma.user.findUnique({
             where: { username: username },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         })
         return user
@@ -65,7 +68,8 @@ class PrismaUser implements User {
         const user = await prisma.user.findUnique({
             where: { email: email },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         })
         return user
@@ -86,7 +90,8 @@ class PrismaUser implements User {
                 password: passwordHash,
             },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         })
         return user
@@ -102,7 +107,8 @@ class PrismaUser implements User {
             },
             })
             .catch((err) => {
-                console.log(err)
+                // console.log(err)
+                logger.error(err)
                 return null
             })
         return user
@@ -112,7 +118,8 @@ class PrismaUser implements User {
         const user = await prisma.user.delete({
             where: { userId: userId },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         })
         return user
@@ -125,7 +132,8 @@ class PrismaUser implements User {
                 password: passwordHash,
             },
         }).catch((err) => {
-            console.log(err)
+            // console.log(err)
+            logger.error(err)
             return null
         }
         )

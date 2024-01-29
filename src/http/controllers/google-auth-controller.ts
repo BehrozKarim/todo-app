@@ -22,7 +22,6 @@ export const googleAuth = (req: Request, res: Response) => {
         access_type: 'offline',
         scope: SCOPES,
     });
-    console.log(authUrl);
     res.redirect(authUrl);
 };
 

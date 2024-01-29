@@ -2,6 +2,7 @@ import {google} from 'googleapis';
 import {Request, Response} from 'express';
 import {userModel} from '../stores/user-store';
 import { createToken } from '../../utils/utils';
+import logger from '../../shared/logger';
 
 const oAuth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -51,7 +52,16 @@ export const googleAuthCallbackService = async (code: string) => {
                 }
             }
         } catch (error) {
-            console.log(error);
+            // console.log(error);
+            if (typeof error === 'string') {
+                logger.error(error);
+                return {
+                    message: error,
+                    status: 500,
+                };
+            } else {
+                logger.error("Error in googleAuthCallbackService");
+            }
             return {
                 message: 'Internal Server Error',
                 status: 500,
