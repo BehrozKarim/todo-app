@@ -43,76 +43,85 @@ interface Task {
 
 class PrismaTask implements Task{
     async create(data: TaskCreationData): Promise<storeResult<TaskData, TaskAlreadyExistsError>> {
-        const task = await prisma.todo.create({
-            data: {
-                id: uuidv4(),
-                title: data.title,
-                description: data.description,
-                userId: data.userId,
-            },
-        })
+        try {
+            const task = await prisma.todo.create({
+                data: {
+                    id: uuidv4(),
+                    title: data.title,
+                    description: data.description,
+                    userId: data.userId,
+                },
+            })
+            return Ok(task)
 
-        if (!task) {
+        } catch (error) {
             return Err(new TaskAlreadyExistsError(data.title))
         }
-
-        return Ok(task)
     }
 
     async get(id: string): Promise<storeResult<TaskData, TaskNotFoundError>> {
-        const task = await prisma.todo.findUnique({
-            where: { id: id },
-        })
+        try {
+            const task = await prisma.todo.findUnique({
+                where: { id: id },
+            })
 
-        if (!task) {
+            if (!task) {
+                return Err(new TaskNotFoundError(id))
+            }
+
+            return Ok(task)
+        } catch (error) {
             return Err(new TaskNotFoundError(id))
         }
-
-        return Ok(task)
     }
 
     async update(data: updateData): Promise<storeResult<TaskData, TaskNotFoundError>> {
-        const task = await prisma.todo.update({
-            where: { id: data.id },
-            data: {
-                title: data.title,
-                description: data.description,
-                completed: data.completed,
-            },
-        })
+        try {
+            const task = await prisma.todo.update({
+                where: { id: data.id },
+                data: {
+                    title: data.title,
+                    description: data.description,
+                    completed: data.completed,
+                },
+            })
+            return Ok(task)
 
-        if (!task) {
+        } catch (error) {
             return Err(new TaskNotFoundError(data.id))
         }
-
-        return Ok(task)
     }
 
     async delete(id: string): Promise<storeResult<TaskData, TaskNotFoundError>> {
-        const task = await prisma.todo.delete({
-            where: { id: id },
-        })
+        try {
+            const task = await prisma.todo.delete({
+                where: { id: id },
+            })
+            return Ok(task)
 
-        if (!task) {
+        } catch (error) {
             return Err(new TaskNotFoundError(id))
         }
-
-        return Ok(task)
     }
 
     async getAllUserTasks(userId: string, page: number): Promise<storeResult<TaskData[], TaskNotFoundError>> {
-        const tasks = await prisma.todo.findMany({
-            take: 10,
-            skip: (page - 1) * 10,
-            where: { userId: userId },
-            orderBy: { createdAt: 'desc' },
-        })
+        try {
+            const tasks = await prisma.todo.findMany({
+                take: 10,
+                skip: (page - 1) * 10,
+                where: { userId: userId },
+                orderBy: { createdAt: 'desc' },
+            })
 
-        if (!tasks) {
+            if (!tasks) {
+                return Err(new TaskNotFoundError(userId))
+            }
+
+            return Ok(tasks)
+            
+        } catch (error) {
             return Err(new TaskNotFoundError(userId))
         }
-
-        return Ok(tasks)
     }
 }
 

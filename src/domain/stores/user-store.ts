@@ -1,8 +1,6 @@
 import { PrismaClient} from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import * as bcrypt from "bcrypt";
-import { createToken } from "../../utils/utils";
-import logger from "../../shared/logger";
 import { Result, Ok, Err } from "oxide.ts"
 import { UserNotFoundError, UserAlreadyExistsError, UserInvalidOperationError } from "./user-store-errors";
 const prisma = new PrismaClient();
@@ -47,106 +45,115 @@ interface User {
 
 class PrismaUser implements User {
     async findById(id: string): Promise<storeResult<userData, UserNotFoundError>> {
-        const user = await prisma.user.findUnique({
-            where: { userId: id },
-        })
+        try {
+            const user = await prisma.user.findUnique({
+                where: { userId: id },
+            })
 
-        if (!user) {
+            if (!user) {
+                return Err(new UserNotFoundError(id, "id"))
+            }
+
+            return Ok(user)
+        } catch (error) {
             return Err(new UserNotFoundError(id, "id"))
         }
-
-        return Ok(user)
     }
 
     async findByUsername(username: string): Promise<storeResult<userData, UserNotFoundError>> {
-        const user = await prisma.user.findUnique({
-            where: { username: username },
-        })
+        try {
+            const user = await prisma.user.findUnique({
+                where: { username: username },
+            })
 
-        if (!user) {
+            if (!user) {
+                return Err(new UserNotFoundError(username, "username"))
+            }
+
+            return Ok(user)
+        } catch (error) {
             return Err(new UserNotFoundError(username, "username"))
         }
-
-        return Ok(user)
     }
 
     async findByEmail(email: string): Promise<storeResult<userData, UserNotFoundError>> {
-        const user = await prisma.user.findUnique({
-            where: { email: email },
-        })
+        try {
+            const user = await prisma.user.findUnique({
+                where: { email: email },
+            })
 
-        if (!user) {
+            if (!user) {
+                return Err(new UserNotFoundError(email, "email"))
+            }
+
+            return Ok(user)
+        } catch (error) {
             return Err(new UserNotFoundError(email, "email"))
         }
-
-        return Ok(user)
     }
 
 
     async create(data: userSignUpData): Promise<storeResult<userData, UserAlreadyExistsError>> {
-        let passwordHash = null
-        if (data.password){
-            passwordHash = await bcrypt.hash(data.password, 10)
-        }
-        const user = await prisma.user.create({
-            data: {
-                userId: uuidv4(),
-                name: data.name,
-                username: data.username,
-                email: data.email,
-                password: passwordHash,
-            },
-        })
-
-        if (!user) {
+        try{
+            let passwordHash = null
+            if (data.password){
+                passwordHash = await bcrypt.hash(data.password, 10)
+            }
+            const user = await prisma.user.create({
+                data: {
+                    userId: uuidv4(),
+                    name: data.name,
+                    username: data.username,
+                    email: data.email,
+                    password: passwordHash,
+                },
+            })
+            return Ok(user)
+        } catch (error) {
             return Err(new UserAlreadyExistsError(data.username, "username"))
         }
-
-        return Ok(user)
     }
 
     async update(data: updateData, userId: string): Promise<storeResult<userData, UserNotFoundError>> {
-        const user = await prisma.user.update({
-            where: { userId: userId },
-            data: {
-                name: data.name,
-                username: data.username,
-                email: data.email,
-            },
-        })
-
-        if (!user) {
+        try{
+            const user = await prisma.user.update({
+                where: { userId: userId },
+                data: {
+                    name: data.name,
+                    username: data.username,
+                    email: data.email,
+                },
+            })
+            return Ok(user)
+        } catch (error) {
             return Err(new UserNotFoundError(userId, "id"))
         }
-
-        return Ok(user)
     }
 
     async delete(userId: string): Promise<storeResult<userData, UserNotFoundError>> {
-        const user = await prisma.user.delete({
-            where: { userId: userId },
-        })
+        try {
+            const user = await prisma.user.delete({
+                where: { userId: userId },
+            })
 
-        if (!user) {
+            return Ok(user)
+        } catch (error) {
             return Err(new UserNotFoundError(userId, "id"))
         }
-
-        return Ok(user)
     }
 
     async changePassword(passwordHash: string, userId: string): Promise<storeResult<userData, UserNotFoundError>> {
-        const updatedUser = await prisma.user.update({
-            where: { userId: userId },
-            data: {
-                password: passwordHash,
-            },
-        })
-
-        if (!updatedUser) {
+        try{
+            const updatedUser = await prisma.user.update({
+                where: { userId: userId },
+                data: {
+                    password: passwordHash,
+                },
+            })
+            return Ok(updatedUser)
+        } catch (error) {
             return Err(new UserNotFoundError(userId, "id"))
         }
-
-        return Ok(updatedUser)
     }
 }
 

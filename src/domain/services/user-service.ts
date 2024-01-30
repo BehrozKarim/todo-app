@@ -232,8 +232,8 @@ class UserService implements UserServiceInterface{
         const [err, user] = (await userModel.delete(userId)).intoTuple()
         if (!user) {
             return {
-                message: "Internal Server Error",
-                status: 500,
+                message: err.message,
+                status: 404,
             }
         }
         return {
