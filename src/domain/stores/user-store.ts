@@ -3,7 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import * as bcrypt from "bcrypt";
 import { createToken } from "../../utils/utils";
 import logger from "../../shared/logger";
-
+import { Result, Ok, Err } from "oxide.ts"
+import { UserNotFoundError, UserAlreadyExistsError, UserInvalidOperationError } from "./user-store-errors";
 const prisma = new PrismaClient();
 
 
@@ -30,11 +31,14 @@ type userData = {
     createdAt: Date,
 }
 
+type storeResult <T, E = UserInvalidOperationError> = Result<
+    T,
+    E | UserInvalidOperationError>
 
 interface User {
-    findById: (id: string) => Promise<userData | null>,
-    findByUsername: (username: string) => Promise<userData | null>,
-    findByEmail: (email: string) => Promise<userData | null>,
+    findById: (id: string) => Promise<storeResult<userData, UserNotFoundError>>,
+    findByUsername: (username: string) => Promise<storeResult<userData, UserNotFoundError>>,
+    findByEmail: (email: string) => Promise<storeResult<userData, UserNotFoundError>>,
     create: (data: userSignUpData) => Promise<userData | null>,
     update: (data: updateData, userId: string) => Promise<userData | null>,
     delete: (userId: string) => Promise<userData | null>,
@@ -42,37 +46,40 @@ interface User {
 }
 
 class PrismaUser implements User {
-    async findById(id: string): Promise<userData | null> {
+    async findById(id: string): Promise<storeResult<userData, UserNotFoundError>> {
         const user = await prisma.user.findUnique({
             where: { userId: id },
-        }).catch((err) => {
-            // console.log(err)
-            logger.error(err)
-            return null
         })
-        return user
+
+        if (!user) {
+            return Err(new UserNotFoundError(id, "id"))
+        }
+
+        return Ok(user)
     }
 
-    async findByUsername(username: string): Promise<userData | null> {
+    async findByUsername(username: string): Promise<storeResult<userData, UserNotFoundError>> {
         const user = await prisma.user.findUnique({
             where: { username: username },
-        }).catch((err) => {
-            // console.log(err)
-            logger.error(err)
-            return null
         })
-        return user
+
+        if (!user) {
+            return Err(new UserNotFoundError(username, "username"))
+        }
+
+        return Ok(user)
     }
 
-    async findByEmail(email: string): Promise<userData | null> {
+    async findByEmail(email: string): Promise<storeResult<userData, UserNotFoundError>> {
         const user = await prisma.user.findUnique({
             where: { email: email },
-        }).catch((err) => {
-            // console.log(err)
-            logger.error(err)
-            return null
         })
-        return user
+
+        if (!user) {
+            return Err(new UserNotFoundError(email, "email"))
+        }
+
+        return Ok(user)
     }
 
 

@@ -21,7 +21,18 @@ export const googleAuthCallbackService = async (code: string) => {
             });
             const {data} = await oauth2.userinfo.get();
             if (data.email && data.name ) {
-                const user = await userModel.findByEmail(data.email? data.email: '');
+                const result = await userModel.findByEmail(data.email? data.email: '');
+                let user, err;
+                if (result.isOk()) {
+                    [err, user] = result.intoTuple();
+                    if (err) {
+                        logger.error(err);
+                        return {
+                            message: err,
+                            status: 500,
+                        };
+                    }
+                }
                 if (user) {
                     const token = await createToken(user);
                     return {

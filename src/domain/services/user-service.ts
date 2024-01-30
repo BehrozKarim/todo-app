@@ -80,7 +80,18 @@ class UserService implements UserServiceInterface{
     }
 
     async login(username: string, password: string, email: string): Promise<userReturnData | errorData> {
-        const user = await this.model.findByUsername(username)
+        let result = await this.model.findByUsername(username)
+        let user, err;
+        if (result.isOk()) {
+            [err, user] = result.intoTuple()
+            if (err) {
+                return {
+                    message: err,
+                    status: 500,
+                }
+            }
+        }
+        
         if (!user) {
             return {
                 message: "Invalid Credentials",
@@ -111,7 +122,17 @@ class UserService implements UserServiceInterface{
 
     async update(data: userData, userId: string): Promise<userReturnData | errorData>{
 
-        const currentUser = await this.model.findById(userId)
+        const result = await this.model.findById(userId)
+        let currentUser, err;
+        if (result.isOk()) {
+            [err, currentUser] = result.intoTuple()
+            if (err) {
+                return {
+                    message: err,
+                    status: 500,
+                }
+            }
+        }
         if (!currentUser) {
             return {
                 message: "User Not Found",
@@ -157,7 +178,17 @@ class UserService implements UserServiceInterface{
 
     async changePassword(oldPassword: string, newPassword: string, userId: string): Promise<userReturnData | errorData>{
 
-        const currentUser = await userModel.findById(userId)
+        const result = await userModel.findById(userId)
+        let currentUser, err;
+        if (result.isOk()) {
+            [err, currentUser] = result.intoTuple()
+            if (err) {
+                return {
+                    message: err,
+                    status: 500,
+                }
+            }
+        }
         if (!currentUser) {
             return {
                 message: "User Not Found",
@@ -217,7 +248,17 @@ class UserService implements UserServiceInterface{
 
     async get(userId: string): Promise<userReturnData | errorData>{
 
-        const user = await userModel.findById(userId)
+        const result = await userModel.findById(userId)
+        let user, err;
+        if (result.isOk()) {
+            [err, user] = result.intoTuple()
+            if (err) {
+                return {
+                    message: err,
+                    status: 500,
+                }
+            }
+        }
         if (!user) {
             return {
                 message: "Internal Server Error",
