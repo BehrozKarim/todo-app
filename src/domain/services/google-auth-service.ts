@@ -44,12 +44,12 @@ export const googleAuthCallbackService = async (code: string) => {
                     };
                 }
                 else if (!user) {
-                    const newUser = await userModel.create({
+                    const [_, newUser] = (await userModel.create({
                         name: data.name,
                         email: data.email,
                         username: data.email,
                         password: '',
-                    });
+                    })).intoTuple();
                     if (newUser) {
                         const token = await createToken(newUser);
                         return {

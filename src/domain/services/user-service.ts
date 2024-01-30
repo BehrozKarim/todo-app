@@ -58,7 +58,7 @@ class UserService implements UserServiceInterface{
             }
         }
 
-        const user = await this.model.create(data)
+        const [err, user] = (await this.model.create(data)).intoTuple()
         if (!user) {
             return {
                 message: "Internal Server Error",
@@ -158,7 +158,7 @@ class UserService implements UserServiceInterface{
             }
         }
     
-        const user = await userModel.update(data, userId)
+        const [_, user] = (await userModel.update(data, userId)).intoTuple()
         if (!user) {
             return {
                 message: "Internal Server Error",
@@ -204,7 +204,7 @@ class UserService implements UserServiceInterface{
     
         if (await bcrypt.compare(oldPassword, currentUser.password)) {
             const passwordHash = await bcrypt.hash(newPassword, 10)
-            const user = await this.model.changePassword(passwordHash, userId)
+            const [_, user] = (await this.model.changePassword(passwordHash, userId)).intoTuple()
             if (!user) {
                 return {
                     message: "Internal Server Error",
@@ -229,7 +229,7 @@ class UserService implements UserServiceInterface{
 
     async delete(userId: string): Promise<userReturnData | errorData>{
 
-        const user = await userModel.delete(userId)
+        const [err, user] = (await userModel.delete(userId)).intoTuple()
         if (!user) {
             return {
                 message: "Internal Server Error",
