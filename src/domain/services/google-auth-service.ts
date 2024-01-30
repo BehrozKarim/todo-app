@@ -21,19 +21,15 @@ export const googleAuthCallbackService = async (code: string) => {
             });
             const {data} = await oauth2.userinfo.get();
             if (data.email && data.name ) {
-                const result = await userModel.findByEmail(data.email? data.email: '');
-                let user, err;
-                if (result.isOk()) {
-                    [err, user] = result.intoTuple();
-                    if (err) {
-                        logger.error(err);
-                        return {
-                            message: err,
-                            status: 500,
-                        };
-                    }
+                const [err, user] = (await userModel.findByEmail(data.email? data.email: '')).intoTuple();
+                if (err) {
+                    logger.error(err.message);
+                    return {
+                        message: err.message,
+                        status: 404,
+                    };
                 }
-                if (user) {
+                else if (user) {
                     const token = await createToken(user);
                     return {
                         status: 200,
@@ -44,13 +40,20 @@ export const googleAuthCallbackService = async (code: string) => {
                     };
                 }
                 else if (!user) {
-                    const [_, newUser] = (await userModel.create({
+                    const [createErr, newUser] = (await userModel.create({
                         name: data.name,
                         email: data.email,
                         username: data.email,
                         password: '',
                     })).intoTuple();
-                    if (newUser) {
+                    if (createErr) {
+                        logger.error(createErr.message);
+                        return {
+                            message: createErr.message,
+                            status: 400,
+                        };
+                    }
+                    else if (newUser) {
                         const token = await createToken(newUser);
                         return {
                             status: 201,
@@ -63,7 +66,6 @@ export const googleAuthCallbackService = async (code: string) => {
                 }
             }
         } catch (error) {
-            // console.log(error);
             if (typeof error === 'string') {
                 logger.error(error);
                 return {

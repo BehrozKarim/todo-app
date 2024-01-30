@@ -44,9 +44,9 @@ class TaskService implements TaskServiceInterface{
 
     async get(taskId: string, userId: string): Promise<ReturnTaskData | errorData> {
         const [err, task] = (await this.model.get(taskId)).intoTuple()
-        if (!task) {
+        if (err) {
             return {
-                message: "Task not found",
+                message: err.message,
                 status: 404,
             }
         }
@@ -71,10 +71,10 @@ class TaskService implements TaskServiceInterface{
 
     async getAllUserTasks(userId: string, page: number): Promise<ReturnTaskData[] | errorData> {
         const [err, tasks] = (await this.model.getAllUserTasks(userId, page)).intoTuple()
-        if (!tasks) {
+        if (err) {
             return {
-                message: "Internal Server Error",
-                status: 500,
+                message: err.message,
+                status: 404,
             }
         }
         return tasks.map((task) => {
@@ -99,10 +99,10 @@ class TaskService implements TaskServiceInterface{
             userId: userId,
         }
         const [err, task] = (await this.model.create(data)).intoTuple()
-        if (!task) {
+        if (err) {
             return {
-                message: "Unable to create the task",
-                status: 500,
+                message: err.message,
+                status: 400,
             }
         }
         return {
@@ -120,7 +120,7 @@ class TaskService implements TaskServiceInterface{
 
     async update(taskData: TaskUpdateData, taskId: string, userId: string) :Promise<ReturnTaskData | errorData>{
         const [err, currentTask] = (await this.model.get(taskId)).intoTuple()
-        if (!currentTask) {
+        if (err) {
             return {
                 message: "Task not found",
                 status: 404,
@@ -139,11 +139,11 @@ class TaskService implements TaskServiceInterface{
             completed: taskData.completed || currentTask.completed,
         }
 
-        const [_, task] = (await this.model.update(data)).intoTuple()
-        if (!task) {
+        const [updateErr, task] = (await this.model.update(data)).intoTuple()
+        if (updateErr) {
             return {
-                message: "Unable to update the task",
-                status: 500,
+                message: updateErr.message,
+                status: 404,
             }
         }
         return {
@@ -161,9 +161,9 @@ class TaskService implements TaskServiceInterface{
 
     async delete(taskId: string, userId: string): Promise<ReturnTaskData | errorData> {
         const [err, task] = (await this.model.get(taskId)).intoTuple()
-        if (!task) {
+        if (err) {
             return {
-                message: "Task not found",
+                message: err.message,
                 status: 404,
             }
         }
@@ -173,11 +173,11 @@ class TaskService implements TaskServiceInterface{
                 status: 401,
             }
         }
-        const [_, deletedTask] = (await this.model.delete(taskId)).intoTuple()
-        if (!deletedTask) {
+        const [deleteErr, deletedTask] = (await this.model.delete(taskId)).intoTuple()
+        if (deleteErr) {
             return {
-                message: "Unable to delete the task",
-                status: 500,
+                message: deleteErr.message,
+                status: 404,
             }
         }
         return {
