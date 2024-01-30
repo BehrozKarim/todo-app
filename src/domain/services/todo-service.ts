@@ -43,7 +43,7 @@ class TaskService implements TaskServiceInterface{
     }
 
     async get(taskId: string, userId: string): Promise<ReturnTaskData | errorData> {
-        const task = await this.model.get(taskId)
+        const [err, task] = (await this.model.get(taskId)).intoTuple()
         if (!task) {
             return {
                 message: "Task not found",
@@ -70,7 +70,7 @@ class TaskService implements TaskServiceInterface{
     }
 
     async getAllUserTasks(userId: string, page: number): Promise<ReturnTaskData[] | errorData> {
-        const tasks = await this.model.getAllUserTasks(userId, page)
+        const [err, tasks] = (await this.model.getAllUserTasks(userId, page)).intoTuple()
         if (!tasks) {
             return {
                 message: "Internal Server Error",
@@ -98,7 +98,7 @@ class TaskService implements TaskServiceInterface{
             description: taskData.description || "",
             userId: userId,
         }
-        const task = await this.model.create(data)
+        const [err, task] = (await this.model.create(data)).intoTuple()
         if (!task) {
             return {
                 message: "Unable to create the task",
@@ -119,7 +119,7 @@ class TaskService implements TaskServiceInterface{
     }
 
     async update(taskData: TaskUpdateData, taskId: string, userId: string) :Promise<ReturnTaskData | errorData>{
-        const currentTask = await this.model.get(taskId)
+        const [err, currentTask] = (await this.model.get(taskId)).intoTuple()
         if (!currentTask) {
             return {
                 message: "Task not found",
@@ -139,7 +139,7 @@ class TaskService implements TaskServiceInterface{
             completed: taskData.completed || currentTask.completed,
         }
 
-        const task = await this.model.update(data)
+        const [_, task] = (await this.model.update(data)).intoTuple()
         if (!task) {
             return {
                 message: "Unable to update the task",
@@ -160,7 +160,7 @@ class TaskService implements TaskServiceInterface{
     }
 
     async delete(taskId: string, userId: string): Promise<ReturnTaskData | errorData> {
-        const task = await this.model.get(taskId)
+        const [err, task] = (await this.model.get(taskId)).intoTuple()
         if (!task) {
             return {
                 message: "Task not found",
@@ -173,7 +173,7 @@ class TaskService implements TaskServiceInterface{
                 status: 401,
             }
         }
-        const deletedTask = await this.model.delete(taskId)
+        const [_, deletedTask] = (await this.model.delete(taskId)).intoTuple()
         if (!deletedTask) {
             return {
                 message: "Unable to delete the task",
