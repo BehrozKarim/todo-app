@@ -10,7 +10,7 @@ type User = {
 }
 
 async function usernameExists(username: string) {
-    const user = await userModel.findByUsername(username)
+    const [err, user] = (await userModel.findByUsername(username)).intoTuple()
     if (user) {
         return true
     } else {
@@ -19,7 +19,7 @@ async function usernameExists(username: string) {
 }
 
 async function emailExists(email: string) {
-    const user = await userModel.findByEmail(email)
+    const [err, user] = (await userModel.findByEmail(email)).intoTuple()
     if (user) {
         return true
     } else {

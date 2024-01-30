@@ -58,11 +58,11 @@ class UserService implements UserServiceInterface{
             }
         }
 
-        const user = await this.model.create(data)
-        if (!user) {
+        const [err, user] = (await this.model.create(data)).intoTuple()
+        if (err) {
             return {
-                message: "Internal Server Error",
-                status: 500,
+                message: err.message,
+                status: 400,
             }
         }
 
@@ -80,14 +80,29 @@ class UserService implements UserServiceInterface{
     }
 
     async login(username: string, password: string, email: string): Promise<userReturnData | errorData> {
-        const user = await this.model.findByUsername(username)
-        if (!user) {
+        const [err, user] = (await this.model.findByUsername(username)).intoTuple()
+        if (err) {
             return {
-                message: "Invalid Credentials",
-                status: 400,
+                message: err.message,
+                status: 404,
             }
         }
-
+        else if (!user) {
+            const [err, user] = (await this.model.findByEmail(email)).intoTuple()
+            if (err) {
+                return {
+                    message: err.message,
+                    status: 404,
+                }
+            }
+            else if (!user) {
+                return {
+                    message: "Invalid Credentials",
+                    status: 400,
+                }
+            }
+        }
+    
         const match = await bcrypt.compare(password, user.password? user.password: '')
         if (!match) {
             return {
@@ -111,10 +126,10 @@ class UserService implements UserServiceInterface{
 
     async update(data: userData, userId: string): Promise<userReturnData | errorData>{
 
-        const currentUser = await this.model.findById(userId)
-        if (!currentUser) {
+        const [err, currentUser] = (await this.model.findById(userId)).intoTuple()
+        if (err) {
             return {
-                message: "User Not Found",
+                message: err.message,
                 status: 404,
             }
         }
@@ -137,11 +152,11 @@ class UserService implements UserServiceInterface{
             }
         }
     
-        const user = await userModel.update(data, userId)
-        if (!user) {
+        const [updateErr, user] = (await userModel.update(data, userId)).intoTuple()
+        if (updateErr) {
             return {
-                message: "Internal Server Error",
-                status: 500,
+                message: updateErr.message,
+                status: 404,
             }
         }
     
@@ -157,10 +172,10 @@ class UserService implements UserServiceInterface{
 
     async changePassword(oldPassword: string, newPassword: string, userId: string): Promise<userReturnData | errorData>{
 
-        const currentUser = await userModel.findById(userId)
-        if (!currentUser) {
+        const [err, currentUser] = (await userModel.findById(userId)).intoTuple()
+        if (err) {
             return {
-                message: "User Not Found",
+                message: err.message,
                 status: 404,
             }
         }
@@ -173,11 +188,11 @@ class UserService implements UserServiceInterface{
     
         if (await bcrypt.compare(oldPassword, currentUser.password)) {
             const passwordHash = await bcrypt.hash(newPassword, 10)
-            const user = await this.model.changePassword(passwordHash, userId)
+            const [err, user] = (await this.model.changePassword(passwordHash, userId)).intoTuple()
             if (!user) {
                 return {
-                    message: "Internal Server Error",
-                    status: 500,
+                    message: err.message,
+                    status: 404,
                 }
             }
             return {
@@ -198,11 +213,11 @@ class UserService implements UserServiceInterface{
 
     async delete(userId: string): Promise<userReturnData | errorData>{
 
-        const user = await userModel.delete(userId)
-        if (!user) {
+        const [err, user] = (await userModel.delete(userId)).intoTuple()
+        if (err) {
             return {
-                message: "Internal Server Error",
-                status: 500,
+                message: err.message,
+                status: 404,
             }
         }
         return {
@@ -217,11 +232,11 @@ class UserService implements UserServiceInterface{
 
     async get(userId: string): Promise<userReturnData | errorData>{
 
-        const user = await userModel.findById(userId)
-        if (!user) {
+        const [err, user] = (await userModel.findById(userId)).intoTuple()
+        if (err) {
             return {
-                message: "Internal Server Error",
-                status: 500,
+                message: err.message,
+                status: 404,
             }
         }
         return {

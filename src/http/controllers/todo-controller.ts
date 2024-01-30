@@ -1,7 +1,7 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import  {Task, taskModel}  from '../../domain/stores/todo-store'
 import { taskService, TaskServiceInterface } from '../../domain/services/todo-service'
+import { Result } from 'oxide.ts'
 dotenv.config()
 
 interface customRequest extends Request {
@@ -24,7 +24,12 @@ class TodoController {
 
     async createTask(req: customRequest, res: Response) {
         if (req.userId){
-            const response = await this.service.create(req.body, req.userId)
+            const result = await Result.safe(this.service.create(req.body, req.userId))
+            if (result.isErr()) {
+                res.status(500).json(result.unwrapErr())
+                return
+            }
+            const response = result.unwrap()
             res.status(response.status).json(response)
         }
         else {
@@ -34,7 +39,12 @@ class TodoController {
 
     async getTask(req: customRequest, res: Response) {
         if (req.userId){
-            const response = await this.service.get(req.params.id, req.userId)
+            const result = await Result.safe(this.service.get(req.params.id, req.userId))
+            if (result.isErr()) {
+                res.status(500).json(result.unwrapErr())
+                return
+            }
+            const response = result.unwrap()
             res.status(response.status).json(response)
         }
         else {
@@ -48,20 +58,35 @@ class TodoController {
             res.status(401).json({message: "Unauthorized"})
             return
         }
-        const response = await this.service.update(req.body, req.params.id, req.userId)
+        const result = await Result.safe(this.service.update(req.body, req.params.id, req.userId))
+        if (result.isErr()) {
+            res.status(500).json(result.unwrapErr())
+            return
+        }
+        const response = result.unwrap()
         res.status(response.status).json(response)
     }
 
     async getAllUserTasks(req: customRequest, res: Response) {
         if (req.userId){
-            const response = await this.service.getAllUserTasks(req.userId, Number(req.query.page))
+            const result = await Result.safe(this.service.getAllUserTasks(req.userId, Number(req.query.page)))
+            if (result.isErr()) {
+                res.status(500).json(result.unwrapErr())
+                return
+            }
+            const response = result.unwrap()
             res.json(response)
         }
     }
 
     async deleteTask(req: customRequest, res: Response) {
         if (req.userId){
-            const response = await this.service.delete(req.params.id, req.userId)
+            const result = await Result.safe(this.service.delete(req.params.id, req.userId))
+            if (result.isErr()) {
+                res.status(500).json(result.unwrapErr())
+                return
+            }
+            const response = result.unwrap()
             res.status(response.status).json(response)
         }
         else {
