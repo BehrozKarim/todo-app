@@ -1,6 +1,7 @@
 import {google} from 'googleapis';
 import {Request, Response, response} from 'express';
 import {googleAuthCallbackService} from '../../domain/services/google-auth-service';
+import {Result } from 'oxide.ts';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -28,7 +29,12 @@ export const googleAuth = (req: Request, res: Response) => {
 export const googleAuthCallback = async (req: Request, res: Response) => {
     const {code} = req.query;
     if (code) {
-        const response = await googleAuthCallbackService(code.toString())
+        const result = await Result.safe(googleAuthCallbackService(code.toString()));
+        if (result.isErr()) {
+            res.status(500).json(result.unwrapErr())
+            return
+        }
+        const response = result.unwrap()
         if (response)
             res.status(response.status).json(response);
         else
