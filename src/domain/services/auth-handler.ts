@@ -26,4 +26,4 @@ class AuthHandler implements AuthHandlerInterface{
 }
 
 const authHandler : AuthHandlerInterface = new AuthHandler()
-export default authHandler
+export {AuthHandlerInterface, authHandler}

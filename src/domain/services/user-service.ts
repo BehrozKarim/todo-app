@@ -2,6 +2,8 @@ import {userModel, User} from "../stores/user-store";
 import {createToken} from "../../utils/utils";
 import {usernameExists, emailExists} from "../../utils/utils";
 import * as bcrypt from 'bcrypt'
+import { AuthHandlerInterface, authHandler } from "./auth-handler";
+import { Result } from "oxide.ts";
 
 
 type userData = {
@@ -38,8 +40,10 @@ interface UserServiceInterface {
 
 class UserService implements UserServiceInterface{
     private model: User
-    constructor(model: User) {
+    private auth: AuthHandlerInterface
+    constructor(model: User, auth: AuthHandlerInterface ) {
         this.model = model
+        this.auth = auth
     }
 
     async create(data: userData): Promise<userReturnData | errorData>{
@@ -57,7 +61,16 @@ class UserService implements UserServiceInterface{
                 status: 400,
             }
         }
-
+        if(data.password) {
+            const password = await Result.safe(this.auth.hashPassword(data.password))
+            if (password.isErr()) {
+                return {
+                    message: password.unwrapErr().message,
+                    status: 500,
+                }
+            }
+            data.password = password.unwrap()
+        }
         const [err, user] = (await this.model.create(data)).intoTuple()
         if (err) {
             return {
@@ -66,7 +79,15 @@ class UserService implements UserServiceInterface{
             }
         }
 
-        const token = await createToken({userId: user.userId})
+        // const token = await createToken({userId: user.userId})
+        const resultToken = await Result.safe(this.auth.createToken(user.userId))
+        if (resultToken.isErr()) {
+            return {
+                message: resultToken.unwrapErr().message,
+                status: 500,
+            }
+        }
+        const token = resultToken.unwrap()
         return {
             message: "User Created Successfully",
             token: token,
@@ -103,15 +124,30 @@ class UserService implements UserServiceInterface{
             }
         }
     
-        const match = await bcrypt.compare(password, user.password? user.password: '')
-        if (!match) {
+        // const match = await bcrypt.compare(password, user.password? user.password: '')
+        const match = await Result.safe(this.auth.verifyPassword(password, user.password? user.password: ''))
+        if (match.isErr()) {
+            return {
+                message: match.unwrapErr().message,
+                status: 500,
+            }
+        }
+        else if (!match.unwrap()) {
             return {
                 message: "Invalid Credentials",
                 status: 400,
             }
         }
-
-        const token = await createToken({userId: user.userId})
+        
+        // const token = await createToken({userId: user.userId})
+        const resultToken = await Result.safe(this.auth.createToken(user.userId))
+        if (resultToken.isErr()) {
+            return {
+                message: resultToken.unwrapErr().message,
+                status: 500,
+            }
+        }
+        const token = resultToken.unwrap()
         return {
             message: "Logged In Successfully",
             token: token,
@@ -251,5 +287,5 @@ class UserService implements UserServiceInterface{
 
 }
 
-const userService: UserServiceInterface = new UserService(userModel)
+const userService: UserServiceInterface = new UserService(userModel, authHandler)
 export {userService, UserServiceInterface}

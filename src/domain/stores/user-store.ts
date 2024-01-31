@@ -95,17 +95,13 @@ class PrismaUser implements User {
 
     async create(data: userSignUpData): Promise<storeResult<userData, UserAlreadyExistsError>> {
         try{
-            let passwordHash = null
-            if (data.password){
-                passwordHash = await bcrypt.hash(data.password, 10)
-            }
             const user = await prisma.user.create({
                 data: {
                     userId: uuidv4(),
                     name: data.name,
                     username: data.username,
                     email: data.email,
-                    password: passwordHash,
+                    password: data.password,
                 },
             })
             return Ok(user)
