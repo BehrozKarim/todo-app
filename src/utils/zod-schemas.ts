@@ -45,4 +45,8 @@ const updateTodoSchema = z.object({
     completed: z.boolean().optional(),
 })
 
-export { signupSchema, loginSchema, updateUserSchema, restPasswordSchema, todoSchema, idSchema, updateTodoSchema }
+export {
+    signupSchema, loginSchema, updateUserSchema,
+    restPasswordSchema, todoSchema, idSchema,
+    updateTodoSchema
+}
