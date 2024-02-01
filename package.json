@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "concurrently \"npx tsc --watch\" \"nodemon -q public/bin/www\"",
     "build": "tsc",
-    "start": "ts-node public/bin/www"
+    "start": "ts-node public/bin/www",
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [],
   "author": "Behroz Karim",
@@ -34,6 +35,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.0",
     "@types/bcrypt": "^5.0.2",
     "@types/body-parser": "^1.19.5",
     "@types/cors": "^2.8.17",
