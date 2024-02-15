@@ -1,4 +1,4 @@
-import {userModel, User} from "../stores/user-store";
+import {userModel, User} from "../../domain/stores/user-store";
 import {createToken} from "../../utils/utils";
 import {usernameExists, emailExists} from "../../utils/utils";
 import * as bcrypt from 'bcrypt'

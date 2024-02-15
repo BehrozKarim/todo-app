@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import {userService, UserServiceInterface } from '../../domain/services/user-service'
+import {userService, UserServiceInterface } from '../../app/services/user-service'
 import { Result } from 'oxide.ts'
 dotenv.config()
 

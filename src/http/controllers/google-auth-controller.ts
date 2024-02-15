@@ -1,6 +1,6 @@
 import {google} from 'googleapis';
 import {Request, Response, response} from 'express';
-import {googleAuthCallbackService} from '../../domain/services/google-auth-service';
+import {googleAuthCallbackService} from '../../app/services/google-auth-service';
 import {Result } from 'oxide.ts';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
