@@ -1,6 +1,6 @@
 import dotenv from "dotenv"
-import app from "../src/http/bootstrap"
-import logger from "../src/shared/logger"
+import app from "../http/app/bootstrap"
+import logger from "../src/infra/logger"
 import { program } from "commander"
 dotenv.config()
 

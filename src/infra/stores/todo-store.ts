@@ -1,45 +1,10 @@
 import { PrismaClient } from '@prisma/client'
 import {v4 as uuidv4} from 'uuid'
+import { Ok, Err } from 'oxide.ts'
+import {Task, TaskCreationData, TaskData, storeResult, updateData} from '../../domain/todo-entities'
+import {TaskAlreadyExistsError, TaskNotFoundError} from '../../domain/todo-store-errors'
+
 const prisma = new PrismaClient()
-import logger from '../../shared/logger'
-import {Result, Ok, Err} from 'oxide.ts'
-import { TaskNotFoundError, TaskAlreadyExistsError, TaskInvalidOperationError } from './todo-store-errors'
-
-type TaskCreationData = {
-    title: string,
-    description: string,
-    userId: string,
-}
-
-type updateData = {
-    id: string,
-    title?: string,
-    description?: string,
-    completed?: boolean,
-}
-
-type TaskData = {
-    id: string,
-    title: string,
-    description: string,
-    completed: boolean,
-    userId: string,
-    createdAt: Date,
-    updatedAt: Date,
-}
-
-type storeResult <T, E = TaskInvalidOperationError> = Result<
-    T,
-    E | TaskInvalidOperationError
->
-
-interface Task {
-    create: (data: TaskCreationData) => Promise<storeResult<TaskData, TaskAlreadyExistsError>>,
-    get: (id: string) => Promise<storeResult<TaskData, TaskNotFoundError>>,
-    update: (data: updateData) => Promise<storeResult<TaskData, TaskNotFoundError>>,
-    delete: (id: string) => Promise<storeResult<TaskData, TaskNotFoundError>>,
-    getAllUserTasks: (userId: string, page: number) => Promise<storeResult<TaskData[], TaskNotFoundError>>,
-}
 
 class PrismaTask implements Task{
     async create(data: TaskCreationData): Promise<storeResult<TaskData, TaskAlreadyExistsError>> {

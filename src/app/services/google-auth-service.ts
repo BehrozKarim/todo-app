@@ -1,8 +1,7 @@
 import {google} from 'googleapis';
-import {Request, Response} from 'express';
-import {userModel} from '../../domain/stores/user-store';
+import {userModel} from '../../infra/stores/user-store';
 import { createToken } from '../../utils/utils';
-import logger from '../../shared/logger';
+import logger from '../../infra/logger';
 
 const oAuth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,

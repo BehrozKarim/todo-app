@@ -1,48 +1,11 @@
 import { PrismaClient} from "@prisma/client";
 import { v4 as uuidv4 } from "uuid";
 import * as bcrypt from "bcrypt";
-import { Result, Ok, Err } from "oxide.ts"
-import { UserNotFoundError, UserAlreadyExistsError, UserInvalidOperationError } from "./user-store-errors";
+import { Ok, Err } from "oxide.ts"
+import { UserNotFoundError, UserAlreadyExistsError } from "../../domain/user-store-errors";
+import { User, userData, userSignUpData, updateData, storeResult } from "../../domain/user-entities";
+
 const prisma = new PrismaClient();
-
-
-type userSignUpData = {
-    name?: string,
-    username: string,
-    email: string,
-    password?: string,
-}
-
-type updateData = {
-    name?: string,
-    username?: string,
-    email?: string,
-}
-
-type userData = {
-    userId: string,
-    name: string | null,
-    username: string,
-    email: string,
-    password: string | null,
-    updatedAt: Date,
-    createdAt: Date,
-}
-
-type storeResult <T, E = UserInvalidOperationError> = Result<
-    T,
-    E | UserInvalidOperationError>
-
-interface User {
-    findById: (id: string) => Promise<storeResult<userData, UserNotFoundError>>,
-    findByUsername: (username: string) => Promise<storeResult<userData, UserNotFoundError>>,
-    findByEmail: (email: string) => Promise<storeResult<userData, UserNotFoundError>>,
-    create: (data: userSignUpData) => Promise<storeResult<userData, UserAlreadyExistsError>>,
-    update: (data: updateData, userId: string) => Promise<storeResult<userData, UserNotFoundError>>,
-    delete: (userId: string) => Promise<storeResult<userData, UserNotFoundError>>,
-    changePassword: (passwordHash: string, userId: string) => Promise<storeResult<userData, UserNotFoundError>>,
-}
-
 class PrismaUser implements User {
     async findById(id: string): Promise<storeResult<userData, UserNotFoundError>> {
         try {
