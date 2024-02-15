@@ -1,10 +1,10 @@
-import router from "./routes/routes";
+import router from "../routes/routes";
 import express, {Express} from "express";
 import bodyParser from 'body-parser'
 // import logger from "./middlewares/logger-middleware";
 import swaggerUi from "swagger-ui-express";
-import swaggerOutput from "../swagger_output.json";
-import logger from "../shared/logger";
+import swaggerOutput from "../../swagger_output.json";
+import logger from "../../src/infra/logger";
 
 const app: Express = express();
 

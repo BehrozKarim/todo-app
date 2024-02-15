@@ -2,7 +2,7 @@ import {
     signupSchema, idSchema, loginSchema,
     restPasswordSchema, todoSchema, updateTodoSchema,
     updateUserSchema 
-} from "../../utils/zod-schemas";
+} from "../../src/utils/zod-schemas";
 
 import { NextFunction, Request, Response } from "express";
 

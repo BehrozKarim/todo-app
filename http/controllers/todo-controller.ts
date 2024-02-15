@@ -1,6 +1,6 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import { taskService, TaskServiceInterface } from '../../app/services/todo-service'
+import { taskService, TaskServiceInterface } from '../../src/app/services/todo-service'
 import { Result } from 'oxide.ts'
 dotenv.config()
 
