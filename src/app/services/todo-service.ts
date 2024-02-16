@@ -1,4 +1,6 @@
 import {taskModel, Task} from "../../infra/stores/todo-store"
+import { sendEmail } from "../../infra/mail-service"
+import { mailData } from "../../utils/utils"
 
 type TaskUpdateData = {
     title?: string,
@@ -180,6 +182,12 @@ class TaskService implements TaskServiceInterface{
                 status: 404,
             }
         }
+        const msg :mailData = {
+            subject: "Task Deleted",
+            data: `Task with id: "${deletedTask.id}" title: "${deletedTask.title}" has been deleted`,
+            userId: userId,
+        }
+        sendEmail(msg)
         return {
             message: "Task Deleted Successfully",
             id: deletedTask.id,

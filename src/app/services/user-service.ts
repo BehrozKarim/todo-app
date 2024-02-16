@@ -80,18 +80,17 @@ class UserService implements UserServiceInterface{
     }
 
     async login(username: string, password: string, email: string): Promise<userReturnData | errorData> {
-        const [err, user] = (await this.model.findByUsername(username)).intoTuple()
+        let errors = []
+        let [err, user] = (await this.model.findByUsername(username)).intoTuple()
         if (err) {
-            return {
-                message: err.message,
-                status: 404,
-            }
+            errors.push(err.message)
         }
-        else if (!user) {
-            const [err, user] = (await this.model.findByEmail(email)).intoTuple()
+        if (!user) {
+            [err, user] = (await this.model.findByEmail(email)).intoTuple()
             if (err) {
+                errors.push(err.message)
                 return {
-                    message: err.message,
+                    message: errors.join(', '),
                     status: 404,
                 }
             }

@@ -9,6 +9,12 @@ type User = {
     userId: string,
 }
 
+type mailData = {
+    subject: string,
+    data: string,
+    userId: string,
+}
+
 async function usernameExists(username: string) {
     const [err, user] = (await userModel.findByUsername(username)).intoTuple()
     if (user) {
@@ -36,4 +42,4 @@ async function createToken(user: User) {
     return token
 }
 
-export { usernameExists, createToken, emailExists }
+export { usernameExists, createToken, emailExists, mailData }
