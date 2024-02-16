@@ -101,7 +101,14 @@ class UserService implements UserServiceInterface{
                 }
             }
         }
-    
+        
+        if (!user.password) {
+            return {
+                message: "Login with Google Account",
+                status: 400,
+            }
+        }
+
         const match = await bcrypt.compare(password, user.password? user.password: '')
         if (!match) {
             return {
