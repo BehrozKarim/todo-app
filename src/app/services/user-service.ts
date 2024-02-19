@@ -1,8 +1,6 @@
-import {userModel, User} from "../../infra/stores/user-store";
 import {createToken} from "../../utils/utils";
-import {usernameExists, emailExists} from "../../utils/utils";
 import * as bcrypt from 'bcrypt'
-import { UserEntity } from "../../domain/user-entities";
+import { UserEntity } from "../../domain/user-entity";
 import { UserRepository } from "../../domain/user-repository";
 import { UserDbRepo } from "../../infra/stores/user-db-repo";
 import { UUIDVo } from "@carbonteq/hexapp";

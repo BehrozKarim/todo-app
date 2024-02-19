@@ -1,13 +1,10 @@
 import {
     RepositoryResult,
-    AlreadyExistsError,
-    NotFoundError,
     Logger,
     UUIDVo,
-    InvalidOperation,
 } from '@carbonteq/hexapp';
 import * as fp from '@carbonteq/fp';
-import { UserEntity, IUser } from '../../domain/user-entities';
+import { UserEntity, IUser } from '../../domain/user-entity';
 import { UserAlreadyExistsError, UserNotFoundError, UserInvalidOperationError } from '../../domain/user-entity-exceptions';
 import { UserRepository } from '../../domain/user-repository';
 import { PrismaClient } from '@prisma/client';

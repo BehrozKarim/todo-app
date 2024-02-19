@@ -1,4 +1,4 @@
-import { NotFoundError, AlreadyExistsError, InvalidOperationError } from "./store-errors";
+import { AlreadyExistsError, NotFoundError, InvalidOperation } from '@carbonteq/hexapp';
 
 export class TaskNotFoundError extends NotFoundError {
     constructor(id: string) {
@@ -12,7 +12,7 @@ export class TaskAlreadyExistsError extends AlreadyExistsError {
     }
 }
 
-export class TaskInvalidOperationError extends InvalidOperationError {
+export class TaskInvalidOperationError extends InvalidOperation {
     constructor(message: string) {
         super(message);
     }

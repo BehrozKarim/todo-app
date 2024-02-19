@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client'
 import {v4 as uuidv4} from 'uuid'
 import { Ok, Err } from 'oxide.ts'
-import {Task, TaskCreationData, TaskData, storeResult, updateData} from '../../domain/todo-entities'
-import {TaskAlreadyExistsError, TaskNotFoundError} from '../../domain/todo-store-errors'
+import {Task, TaskCreationData, TaskData, storeResult, updateData} from '../../domain/todo-entity'
+import {TaskAlreadyExistsError, TaskNotFoundError} from '../../domain/todo-entity-exceptions'
 
 const prisma = new PrismaClient()
 

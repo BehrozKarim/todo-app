@@ -1,5 +1,4 @@
-import { Result } from "oxide.ts"
-import {BaseEntity, IEntity, UUIDVo, SerializedEntity} from "@carbonteq/hexapp"
+import {BaseEntity, IEntity, SerializedEntity} from "@carbonteq/hexapp"
 
 type userSignUpData = {
     name: string | null,
@@ -73,26 +72,3 @@ export class UserEntity extends BaseEntity implements IUser{
         }
     }
 }
-
-
-// type updateData = {
-//     name?: string,
-//     username?: string,
-//     email?: string,
-// }
-
-// type storeResult <T, E = UserInvalidOperationError> = Result<
-//     T,
-//     E | UserInvalidOperationError>
-
-// interface User {
-//     findById: (id: string) => Promise<storeResult<userData, UserNotFoundError>>,
-//     findByUsername: (username: string) => Promise<storeResult<userData, UserNotFoundError>>,
-//     findByEmail: (email: string) => Promise<storeResult<userData, UserNotFoundError>>,
-//     create: (data: userSignUpData) => Promise<storeResult<userData, UserAlreadyExistsError>>,
-//     update: (data: updateData, userId: string) => Promise<storeResult<userData, UserNotFoundError>>,
-//     delete: (userId: string) => Promise<storeResult<userData, UserNotFoundError>>,
-//     changePassword: (passwordHash: string, userId: string) => Promise<storeResult<userData, UserNotFoundError>>,
-// }
-
-// export {User, userData, userSignUpData, updateData, storeResult}
