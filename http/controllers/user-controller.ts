@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import {userService, UserServiceInterface } from '../../src/app/services/user-service'
 import { Result } from 'oxide.ts'
+import logger from '../../src/infra/logger'
 dotenv.config()
 
 interface customRequest extends Request {
