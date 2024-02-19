@@ -5,14 +5,7 @@ import { UserRepository } from "../../domain/user-repository";
 import { UserDbRepo } from "../../infra/stores/user-db-repo";
 import { UUIDVo } from "@carbonteq/hexapp";
 import logger from "../../infra/logger";
-
-
-type userData = {
-    name: string | null,
-    username: string,
-    email: string,
-    password: string | null,
-}
+import { userData } from "../../utils/utils";
 
 type userReturnData = {
     message: string,

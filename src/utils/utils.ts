@@ -42,4 +42,11 @@ async function createToken(user: User) {
     return token
 }
 
+export type userData = {
+    name: string | null,
+    username: string,
+    email: string,
+    password: string | null,
+}
+
 export { usernameExists, createToken, emailExists, mailData }
