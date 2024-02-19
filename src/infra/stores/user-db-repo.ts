@@ -72,6 +72,14 @@ export class UserDbRepo extends UserRepository {
 
     async insert(user: UserEntity): Promise<RepositoryResult<UserEntity, UserAlreadyExistsError>> {
         try {
+            if ((await this.fetchByEmail(user.email)).isOk()) {
+                return fp.Result.Err(new UserAlreadyExistsError(user.email, "email"))
+            }
+            if ( (await this.fetchByUsername(user.username)).isOk()) {
+                return fp.Result.Err(new UserAlreadyExistsError(user.username, "username"))
+            }
+
+
             const createdUser = await prisma.user.create({
                 data: {
                     name: user.name,
@@ -85,7 +93,7 @@ export class UserDbRepo extends UserRepository {
             })
             return fp.Result.Ok(user)
         } catch (error) {
-            return fp.Result.Err(new UserAlreadyExistsError(user.username, "username"))
+            return fp.Result.Err(new UserInvalidOperationError('User creation failed'));
         }
     }
 

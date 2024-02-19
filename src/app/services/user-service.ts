@@ -175,7 +175,6 @@ export class UserService implements UserServiceInterface{
             }
         }
         const currentDetails = user.unwrap()
-        // TODO: Set password if there's no password
         if (!currentDetails.password) {
             return {
                 message: "Login with Google Account",
@@ -240,8 +239,6 @@ export class UserService implements UserServiceInterface{
             status: 200,
         }
     }
-
-
 }
 
 const userService: UserServiceInterface = new UserService(new UserDbRepo())
