@@ -23,13 +23,13 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(username, "username")
                 return fp.Result.Err(err)
             }
-            const ent = new UserEntity(user.name, user.username, user.email, user.password)
+            const ent = new UserEntity( user.username, user.email, user.password??undefined, user.name??undefined )
             const data = {
                 Id: user.userId,
-                name: user.name,
+                name: user.name??undefined,
                 username: user.username,
                 email: user.email,
-                password: user.password,
+                password: user.password??undefined,
                 updatedAt: user.updatedAt,
                 createdAt: user.createdAt
             }
@@ -50,13 +50,13 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(email, "email")
                 return fp.Result.Err(err)
             }
-            const ent = new UserEntity(user.name, user.username, user.email, user.password)
+            const ent = new UserEntity(user.username, user.email, user.password??undefined, user.name??undefined)
             const data = {
                 Id: user.userId,
-                name: user.name,
+                name: user.name??undefined,
                 username: user.username,
                 email: user.email,
-                password: user.password,
+                password: user.password??undefined,
                 updatedAt: user.updatedAt,
                 createdAt: user.createdAt
             }
@@ -79,10 +79,10 @@ export class UserDbRepo extends UserRepository {
 
             const createdUser = await prisma.user.create({
                 data: {
-                    name: user.name,
+                    name: user.name??undefined,
                     username: user.username,
                     email: user.email,
-                    password: user.password,
+                    password: user.password??undefined,
                     userId: user.Id.serialize(),
                     createdAt: user.createdAt,
                     updatedAt: user.updatedAt
@@ -99,10 +99,10 @@ export class UserDbRepo extends UserRepository {
             const updatedUser = await prisma.user.update({
                 where: { userId: user.Id.serialize() },
                 data: {
-                    name: user.name,
+                    name: user.name??undefined,
                     username: user.username,
                     email: user.email,
-                    password: user.password,
+                    password: user.password??undefined,
                     updatedAt: user.updatedAt
                 },
             })
@@ -118,13 +118,13 @@ export class UserDbRepo extends UserRepository {
                 where: { userId: Id.serialize() },
             })
             
-            const ent = new UserEntity(user.name, user.username, user.email, user.password)
+            const ent = new UserEntity(user.username, user.email, user.password??undefined, user.name??undefined)
             const data = {
                 Id: user.userId,
-                name: user.name,
+                name: user.name??undefined,
                 username: user.username,
                 email: user.email,
-                password: user.password,
+                password: user.password??undefined,
                 updatedAt: user.updatedAt,
                 createdAt: user.createdAt
             }
@@ -149,13 +149,13 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(id.serialize(), "id")
                 return fp.Result.Err(err)
             }
-            const ent = new UserEntity(user.name, user.username, user.email, user.password)
+            const ent = new UserEntity(user.username, user.email, user.password??undefined, user.name??undefined)
             const data = {
                 Id: user.userId,
-                name: user.name,
+                name: user.name??undefined,
                 username: user.username,
                 email: user.email,
-                password: user.password,
+                password: user.password??undefined,
                 updatedAt: user.updatedAt,
                 createdAt: user.createdAt
             }

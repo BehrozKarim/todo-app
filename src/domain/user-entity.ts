@@ -1,32 +1,32 @@
 import {BaseEntity, IEntity, SerializedEntity} from "@carbonteq/hexapp"
 
 type userSignUpData = {
-    name: string | null,
+    name?: string,
     username: string,
     email: string,
-    password: string | null,
+    password?: string,
 }
 
 export interface IUser extends IEntity {
-    name: string | null,
+    name?: string,
     username: string,
     email: string,
-    password: string | null,
+    password?: string,
 }
 
 export interface SerializedUserEntity extends SerializedEntity {
-    name: string | null,
+    name?: string,
     username: string,
     email: string,
-    password: string | null,
+    password?: string,
 }
 export class UserEntity extends BaseEntity implements IUser{
-    private _name: string | null
+    private _name?: string
     private _username: string
     private _email: string
-    private _password: string | null
+    private _password?: string
 
-    constructor(name: string | null, username: string, email: string, password: string | null) {
+    constructor(username: string, email: string, password?: string, name?: string) {
         super()
         this._name = name
         this._username = username
@@ -51,7 +51,7 @@ export class UserEntity extends BaseEntity implements IUser{
     }
 
     static create(data: userSignUpData): UserEntity {
-        return new UserEntity(data.name, data.username, data.email, data.password)
+        return new UserEntity(data.username, data.email, data.password, data.name)
     }
 
     fromSerialized(other: SerializedUserEntity): void {

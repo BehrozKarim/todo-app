@@ -2,6 +2,7 @@
 import { PrismaClient } from '@prisma/client'
 import * as jwt from 'jsonwebtoken'
 import {userModel} from '../infra/stores/user-store'
+import { SerializedUserEntity } from '../domain/user-entity'
 
 const prisma = new PrismaClient()
 
@@ -43,10 +44,45 @@ async function createToken(user: User) {
 }
 
 export type userData = {
-    name: string | null,
+    name?: string,
     username: string,
     email: string,
-    password: string | null,
+    password?: string,
+}
+
+export type userReturnData = {
+    token: string,
+    userId: string,
+    name: string | undefined,
+    username: string,
+    email: string,
+    updatedAt: Date,
+    createdAt: Date,
+}
+
+export async function cleanLoginData(data: SerializedUserEntity){
+    const token = await createToken({userId: data.Id})
+    const user: userReturnData = {
+        token: token,
+        userId: data.Id,
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        updatedAt: data.updatedAt,
+        createdAt: data.createdAt,
+    }
+    return user
+}
+
+export async function cleanUserData(data: SerializedUserEntity){
+    return {
+        userId: data.Id,
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        updatedAt: data.updatedAt,
+        createdAt: data.createdAt,
+    }
 }
 
 export { usernameExists, createToken, emailExists, mailData }

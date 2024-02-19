@@ -23,8 +23,8 @@ class TodoController {
     }
 
     async createTask(req: customRequest, res: Response) {
-        if (req.userId){
-            const result = await Result.safe(this.service.create(req.body, req.userId))
+        if (req.body.userId){
+            const result = await Result.safe(this.service.create(req.body, req.body.userId))
             if (result.isErr()) {
                 res.status(500).json(result.unwrapErr())
                 return
@@ -38,8 +38,8 @@ class TodoController {
     }
 
     async getTask(req: customRequest, res: Response) {
-        if (req.userId){
-            const result = await Result.safe(this.service.get(req.params.id, req.userId))
+        if (req.body.userId){
+            const result = await Result.safe(this.service.get(req.params.id, req.body.userId))
             if (result.isErr()) {
                 res.status(500).json(result.unwrapErr())
                 return
@@ -54,11 +54,11 @@ class TodoController {
     }
 
     async updateTask(req: customRequest, res: Response) {
-        if (!req.userId) {
+        if (!req.body.userId) {
             res.status(401).json({message: "Unauthorized"})
             return
         }
-        const result = await Result.safe(this.service.update(req.body, req.params.id, req.userId))
+        const result = await Result.safe(this.service.update(req.body, req.params.id, req.body.userId))
         if (result.isErr()) {
             res.status(500).json(result.unwrapErr())
             return
@@ -68,8 +68,8 @@ class TodoController {
     }
 
     async getAllUserTasks(req: customRequest, res: Response) {
-        if (req.userId){
-            const result = await Result.safe(this.service.getAllUserTasks(req.userId, Number(req.query.page)))
+        if (req.body.userId){
+            const result = await Result.safe(this.service.getAllUserTasks(req.body.userId, Number(req.query.page)))
             if (result.isErr()) {
                 res.status(500).json(result.unwrapErr())
                 return
@@ -80,8 +80,8 @@ class TodoController {
     }
 
     async deleteTask(req: customRequest, res: Response) {
-        if (req.userId){
-            const result = await Result.safe(this.service.delete(req.params.id, req.userId))
+        if (req.body.userId){
+            const result = await Result.safe(this.service.delete(req.params.id, req.body.userId))
             if (result.isErr()) {
                 res.status(500).json(result.unwrapErr())
                 return
