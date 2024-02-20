@@ -7,7 +7,7 @@ export class NewUserDto extends BaseDto {
         name: z.string().optional(),
         username: z.string().min(3),
         email: z.string().email(),
-        password: z.string().optional(),
+        password: z.string().min(8),
     });
 
     constructor(readonly username: string, readonly email: string, readonly password?: string, readonly name?: string) {

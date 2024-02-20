@@ -1,10 +1,5 @@
-// validate username doesn't exist already
-import { PrismaClient } from '@prisma/client'
 import * as jwt from 'jsonwebtoken'
-import {userModel} from '../infra/stores/user-store'
 import { SerializedUserEntity } from '../domain/user-entity'
-
-const prisma = new PrismaClient()
 
 type User = {
     userId: string,
@@ -14,24 +9,6 @@ type mailData = {
     subject: string,
     data: string,
     userId: string,
-}
-
-async function usernameExists(username: string) {
-    const [err, user] = (await userModel.findByUsername(username)).intoTuple()
-    if (user) {
-        return true
-    } else {
-        return false
-    }
-}
-
-async function emailExists(email: string) {
-    const [err, user] = (await userModel.findByEmail(email)).intoTuple()
-    if (user) {
-        return true
-    } else {
-        return false
-    }
 }
 
 async function createToken(user: User) {
@@ -85,4 +62,4 @@ export async function cleanUserData(data: SerializedUserEntity){
     }
 }
 
-export { usernameExists, createToken, emailExists, mailData }
+export { createToken, mailData }

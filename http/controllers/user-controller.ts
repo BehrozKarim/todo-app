@@ -1,11 +1,8 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import {userService, UserServiceInterface } from '../../src/app/services/user-service'
-import { Result } from 'oxide.ts'
-import logger from '../../src/infra/logger'
-import { nUserService } from '../../src/app/services/user-service'
 import { GetUserDto, NewUserDto, UpdateUserDto, UserLoginDto, UserPasswordResetDto } from '../../src/app/dto/user.dto'
-import { cleanLoginData } from '../../src/utils/utils'
+import { cleanLoginData, cleanUserData } from '../../src/utils/utils'
 dotenv.config()
 
 interface customRequest extends Request {
@@ -58,7 +55,7 @@ class UserController implements UserControllerInterface {
             return
         }
         const response = result.unwrap()
-        res.status(200).json(response)
+        res.status(200).json(await cleanLoginData(response))
     }
 
     async logout(req: Request, res: Response) {
@@ -79,7 +76,7 @@ class UserController implements UserControllerInterface {
                 return
             }
             const response = result.unwrap()
-            res.status(200).json(response)
+            res.status(200).json(await cleanUserData(response))
         }
         else {
             res.status(400).json("Invalid Request")
@@ -119,7 +116,7 @@ class UserController implements UserControllerInterface {
                 return
             }
             const response = result.unwrap()
-            res.status(200).json(response)
+            res.status(200).json(await cleanUserData(response))
         }
         else {
             res.status(400).json("Invalid Request")
@@ -139,7 +136,7 @@ class UserController implements UserControllerInterface {
                 return
             }
             const response = result.unwrap()
-            res.status(200).json(response)
+            res.status(200).json(await cleanUserData(response))
         }
         else {
             res.status(400).json("Invalid Request")
