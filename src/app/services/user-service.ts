@@ -7,22 +7,6 @@ import { AppResult } from "@carbonteq/hexapp";
 import { NewUserDto, UpdateUserDto, UserLoginDto, GetUserDto, UserPasswordResetDto } from "../dto/user.dto";
 import { AppError } from '@carbonteq/hexapp';
 
-type userReturnData = {
-    message: string,
-    token?: string,
-    expiresIn?: string,
-    userId: string,
-    name: string | null,
-    username: string,
-    email: string,
-    status: number,
-}
-
-type errorData = {
-    message: string,
-    status : number,
-}
-
 interface UserServiceInterface {
     get: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
     create: (data: NewUserDto) => Promise<AppResult<SerializedUserEntity>>,
@@ -31,6 +15,7 @@ interface UserServiceInterface {
     changePassword: (data: UserPasswordResetDto) => Promise<AppResult<SerializedUserEntity>>,
     delete: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
 }
+
 export class UserService implements UserServiceInterface{
     constructor(private readonly model: UserRepository) {}
 

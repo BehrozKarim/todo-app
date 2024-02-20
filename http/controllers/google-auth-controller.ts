@@ -1,5 +1,5 @@
 import {google} from 'googleapis';
-import {Request, Response, response} from 'express';
+import {Request, Response} from 'express';
 import {googleAuthCallbackService} from '../../src/infra/google-auth-service';
 import {Result } from 'oxide.ts';
 

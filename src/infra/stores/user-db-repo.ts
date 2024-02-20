@@ -1,14 +1,12 @@
 import {
     RepositoryResult,
-    Logger,
     UUIDVo,
 } from '@carbonteq/hexapp';
 import * as fp from '@carbonteq/fp';
-import { UserEntity, IUser } from '../../domain/user-entity';
+import { UserEntity } from '../../domain/user-entity';
 import { UserAlreadyExistsError, UserNotFoundError, UserInvalidOperationError } from '../../domain/user-entity-exceptions';
 import { UserRepository } from '../../domain/user-repository';
 import { PrismaClient } from '@prisma/client';
-// import { Err, Ok } from 'oxide.ts';
 
 const prisma = new PrismaClient();
 

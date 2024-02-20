@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { Request, Response, NextFunction } from "express";
+import { Request, NextFunction } from "express";
 interface customRequest extends Request {
     userId?: string
 }

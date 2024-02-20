@@ -1,6 +1,5 @@
 import { BaseDto, DtoValidationResult } from "@carbonteq/hexapp";
 import { z } from "zod";
-import { userData } from "../../utils/utils";
 
 export class NewUserDto extends BaseDto {
     private static readonly schema = z.object({

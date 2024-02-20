@@ -20,26 +20,9 @@ async function createToken(user: User) {
     return token
 }
 
-export type userData = {
-    name?: string,
-    username: string,
-    email: string,
-    password?: string,
-}
-
-export type userReturnData = {
-    token: string,
-    userId: string,
-    name: string | undefined,
-    username: string,
-    email: string,
-    updatedAt: Date,
-    createdAt: Date,
-}
-
 export async function cleanLoginData(data: SerializedUserEntity){
     const token = await createToken({userId: data.Id})
-    const user: userReturnData = {
+    const user = {
         token: token,
         userId: data.Id,
         name: data.name,

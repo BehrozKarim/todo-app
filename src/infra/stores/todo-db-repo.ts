@@ -1,16 +1,14 @@
 import {
     RepositoryResult,
-    Logger,
     UUIDVo,
 } from '@carbonteq/hexapp';
 import * as fp from '@carbonteq/fp';
 
-import { TaskEntity, ITask } from '../../domain/todo-entity';
+import { TaskEntity } from '../../domain/todo-entity';
 import { TaskNotFoundError, TaskAlreadyExistsError, TaskInvalidOperationError } from '../../domain/todo-entity-exceptions';
 import { TodoRepository } from '../../domain/todo-repository';
 
 import { PrismaClient } from '@prisma/client';
-import logger from '../logger';
 
 const prisma = new PrismaClient();
 
