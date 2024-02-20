@@ -1,261 +1,150 @@
-import {userModel, User} from "../../infra/stores/user-store";
-import {createToken} from "../../utils/utils";
-import {usernameExists, emailExists} from "../../utils/utils";
 import * as bcrypt from 'bcrypt'
-
-
-type userData = {
-    name?: string,
-    username: string,
-    email: string,
-    password?: string,
-}
-
-type userReturnData = {
-    message: string,
-    token?: string,
-    expiresIn?: string,
-    userId: string,
-    name: string | null,
-    username: string,
-    email: string,
-    status: number,
-}
-
-type errorData = {
-    message: string,
-    status : number,
-}
+import { UserEntity, SerializedUserEntity } from "../../domain/user-entity";
+import { UserRepository } from "../../domain/user-repository";
+import { UserDbRepo } from "../../infra/stores/user-db-repo";
+import { UUIDVo } from "@carbonteq/hexapp";
+import { AppResult } from "@carbonteq/hexapp";
+import { NewUserDto, UpdateUserDto, UserLoginDto, GetUserDto, UserPasswordResetDto } from "../dto/user.dto";
+import { AppError } from '@carbonteq/hexapp';
 
 interface UserServiceInterface {
-    create: (data: userData) => Promise<userReturnData | errorData>,
-    login: (username: string, password: string, email: string) => Promise<userReturnData | errorData>,
-    update: (data: userData, userId: string) => Promise<userReturnData | errorData>,
-    changePassword: (oldPassword: string, newPassword: string, userId: string) => Promise<userReturnData | errorData>,
-    delete: (userId: string) => Promise<userReturnData | errorData>,
-    get: (userId: string) => Promise<userReturnData | errorData>,
+    get: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
+    create: (data: NewUserDto) => Promise<AppResult<SerializedUserEntity>>,
+    login: (data: UserLoginDto) => Promise<AppResult<SerializedUserEntity>>,
+    update: (data: UpdateUserDto) => Promise<AppResult<SerializedUserEntity>>,
+    changePassword: (data: UserPasswordResetDto) => Promise<AppResult<SerializedUserEntity>>,
+    delete: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
 }
 
-class UserService implements UserServiceInterface{
-    private model: User
-    constructor(model: User) {
-        this.model = model
+export class UserService implements UserServiceInterface{
+    constructor(private readonly model: UserRepository) {}
+
+    async get({ userId }: GetUserDto) : Promise<AppResult<SerializedUserEntity>> {
+        const userIdVo = (UUIDVo.fromStr(userId)).unwrap()
+        const user = await this.model.fetchById(userIdVo)
+        if (user.isErr()) {
+            return AppResult.Err(user.unwrapErr())
+        }
+        const res = user.map((user) => user.serialize());
+        return AppResult.fromResult(res);
     }
 
-    async create(data: userData): Promise<userReturnData | errorData>{
-
-        if (await usernameExists(data.username)) {
-            return {
-                message: "Username already exists",
-                status: 400,
-            }
+    async create(data: NewUserDto): Promise<AppResult<SerializedUserEntity>> {
+        let passwordHash = undefined
+        if (data.password)
+            passwordHash = await bcrypt.hash(data.password, 10)
+        const user = UserEntity.create({
+            ...data.serialize(),
+            password: passwordHash
+        })
+        const result = await this.model.insert(user)
+        if (result.isErr()) {
+            return AppResult.Err(result.unwrapErr())
         }
-
-        if (await emailExists(data.email)) {
-            return {
-                message: "Email already exists",
-                status: 400,
-            }
-        }
-
-        const [err, user] = (await this.model.create(data)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 400,
-            }
-        }
-
-        const token = await createToken({userId: user.userId})
-        return {
-            message: "User Created Successfully",
-            token: token,
-            expiresIn: '1d',
-            userId: user.userId,
-            email: user.email,
-            username: user.username,
-            name: user.name,
-            status: 201,
-        }
+        return AppResult.fromResult(result.map((user) => user.serialize()));
     }
 
-    async login(username: string, password: string, email: string): Promise<userReturnData | errorData> {
-        let errors = []
-        let [err, user] = (await this.model.findByUsername(username)).intoTuple()
-        if (err) {
-            errors.push(err.message)
+    async login(data: UserLoginDto): Promise<AppResult<SerializedUserEntity>> {
+        let user;
+        if (data.username)
+            user = await this.model.fetchByUsername(data.username)
+        else if (data.email)
+            user = await this.model.fetchByEmail(data.email)
+        else
+            return AppResult.Err(AppError.InvalidData("Invalid Username or Email"))
+        if (user.isErr()) {
+            return AppResult.Err(user.unwrapErr())
         }
-        if (!user) {
-            [err, user] = (await this.model.findByEmail(email)).intoTuple()
-            if (err) {
-                errors.push(err.message)
-                return {
-                    message: errors.join(', '),
-                    status: 404,
-                }
-            }
-            else if (!user) {
-                return {
-                    message: "Invalid Credentials",
-                    status: 400,
-                }
-            }
-        }
-        
-        if (!user.password) {
-            return {
-                message: "Login with Google Account",
-                status: 400,
-            }
+        const originalPassword = user.unwrap().password
+        if (!originalPassword) {
+            return AppResult.Err(AppError.InvalidOperation("Login with Google Account"))
         }
 
-        const match = await bcrypt.compare(password, user.password? user.password: '')
+        const match = await bcrypt.compare(data.password, originalPassword)
         if (!match) {
-            return {
-                message: "Invalid Credentials",
-                status: 400,
-            }
+            return AppResult.Err(AppError.InvalidData("Invalid Credentials"))
         }
-
-        const token = await createToken({userId: user.userId})
-        return {
-            message: "Logged In Successfully",
-            token: token,
-            expiresIn: '1d',
-            userId: user.userId,
-            email: user.email,
-            username: user.username,
-            name: user.name,
-            status: 200,
-        }
+        return AppResult.fromResult(user.map((user) => user.serialize()));
     }
 
-    async update(data: userData, userId: string): Promise<userReturnData | errorData>{
+    async update(data: UpdateUserDto): Promise<AppResult<SerializedUserEntity>> {
+        const userIdVo = (UUIDVo.fromStr(data.userId)).unwrap()
+        const user = await this.model.fetchById(userIdVo)
+        if (user.isErr()) {
+            return AppResult.Err(user.unwrapErr())
+        }
 
-        const [err, currentUser] = (await this.model.findById(userId)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 404,
+        if (data.email) {
+            const emailUser = await this.model.fetchByEmail(data.email)
+            if (emailUser.isOk() && emailUser.unwrap().Id.serialize() !== data.userId) {
+                return AppResult.Err(AppError.InvalidData("Email already exists"))
             }
         }
-    
-        if (data.username && data.username !== currentUser.username) {
-            if (await usernameExists(data.username)) {
-                return {
-                    message: "Username already exists",
-                    status: 400,
-                }
+
+        if (data.username) {
+            const usernameUser = await this.model.fetchByUsername(data.username)
+            if (usernameUser.isOk() && usernameUser.unwrap().Id.serialize() !== data.userId) {
+                return AppResult.Err(AppError.InvalidData("Username already exists"))
             }
         }
-    
-        if (data.email && data.email !== currentUser.email) {
-            if (await emailExists(data.email)) {
-                return {
-                    message: "Email already exists",
-                    status: 400,
-                }
-            }
+
+        const newUserData = {
+            ...user.unwrap().serialize(),
+            name: data.name? data.name: user.unwrap().name,
+            username: data.username? data.username: user.unwrap().username,
+            email: data.email? data.email: user.unwrap().email,
         }
-    
-        const [updateErr, user] = (await userModel.update(data, userId)).intoTuple()
-        if (updateErr) {
-            return {
-                message: updateErr.message,
-                status: 404,
-            }
+        const updatedUser = new UserEntity(newUserData.username, newUserData.email)
+        updatedUser.fromSerialized(newUserData)
+        const result = await this.model.update(updatedUser)
+        if (result.isErr()) {
+            return AppResult.Err(result.unwrapErr())
         }
-    
-        return {
-            message: "User Updated Successfully",
-            userId: user.userId,
-            username: user.username,
-            name: user.name,
-            email: user.email,
-            status: 200,
-        }
+        return AppResult.fromResult(result.map((user) => user.serialize()));
     }
 
-    async changePassword(oldPassword: string, newPassword: string, userId: string): Promise<userReturnData | errorData>{
+    async changePassword(data: UserPasswordResetDto): Promise<AppResult<SerializedUserEntity>> {
+        const userIdVo = (UUIDVo.fromStr(data.userId)).unwrap()
+        const user = await this.model.fetchById(userIdVo)
+        if (user.isErr()) {
+            return AppResult.Err(user.unwrapErr())
+        }
+        const currentDetails = user.unwrap()
+        if (!currentDetails.password) {
+            return AppResult.Err(AppError.InvalidOperation("Login with Google Account"))
+        }
+        const match = await bcrypt.compare(data.oldPassword, currentDetails.password)
+        if (!match) {
+            return AppResult.Err(AppError.InvalidData("Invalid Credentials"))
+        }
+        const passwordHash = await bcrypt.hash(data.newPassword, 10)
+        let updatedUser = new UserEntity(currentDetails.username, currentDetails.email)
+        let serializedUser = {
+            ...currentDetails.serialize(),
+            password: passwordHash
+        }
 
-        const [err, currentUser] = (await userModel.findById(userId)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 404,
-            }
+        updatedUser.fromSerialized(serializedUser)
+        const result = await this.model.update(updatedUser)
+        if (result.isErr()) {
+            return AppResult.Err(result.unwrapErr())
         }
-        else if (!currentUser.password) {
-            return {
-                message: "Login with Google Account",
-                status: 400,
-            }
-        }
-    
-        if (await bcrypt.compare(oldPassword, currentUser.password)) {
-            const passwordHash = await bcrypt.hash(newPassword, 10)
-            const [err, user] = (await this.model.changePassword(passwordHash, userId)).intoTuple()
-            if (!user) {
-                return {
-                    message: err.message,
-                    status: 404,
-                }
-            }
-            return {
-                message: "Password Changed Successfully",
-                userId: user.userId,
-                username: user.username,
-                name: user.name,
-                email: user.email,
-                status: 200,
-            }
-        } else {
-            return {
-                message: "Invalid Credentials",
-                status: 400,
-            }
-        }
+        return AppResult.fromResult(result.map((user) => user.serialize()));
     }
 
-    async delete(userId: string): Promise<userReturnData | errorData>{
-
-        const [err, user] = (await userModel.delete(userId)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 404,
-            }
+    async delete({ userId }: GetUserDto): Promise<AppResult<SerializedUserEntity>> {
+        const userIdVo = (UUIDVo.fromStr(userId)).unwrap()
+        const user = await this.model.fetchById(userIdVo)
+        if (user.isErr()) {
+            return AppResult.Err(user.unwrapErr())
         }
-        return {
-            message: "User Deleted Successfully",
-            userId: user.userId,
-            username: user.username,
-            name: user.name,
-            email: user.email,
-            status: 200,
+        const result = await this.model.deleteById(userIdVo)
+        if (result.isErr()) {
+            return AppResult.Err(result.unwrapErr())
         }
+        return AppResult.fromResult(result.map((user) => user.serialize()));
     }
-
-    async get(userId: string): Promise<userReturnData | errorData>{
-
-        const [err, user] = (await userModel.findById(userId)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 404,
-            }
-        }
-        return {
-            message: "User Details Fetched Successfully",
-            userId: user.userId,
-            username: user.username,
-            name: user.name,
-            email: user.email,
-            status: 200,
-        }
-    }
-
 }
 
-const userService: UserServiceInterface = new UserService(userModel)
+const userService: UserServiceInterface = new UserService(new UserDbRepo())
 export {userService, UserServiceInterface}

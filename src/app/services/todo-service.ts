@@ -1,206 +1,104 @@
-import {taskModel, Task} from "../../infra/stores/todo-store"
 import { sendEmail } from "../../infra/mail-service"
 import { mailData } from "../../utils/utils"
-
-type TaskUpdateData = {
-    title?: string,
-    description?: string,
-    completed?: boolean,
-}
-
-type TaskCreationData = {
-    title: string,
-    description?: string,
-}
-
-type ReturnTaskData = {
-    message: string,
-    id: string,
-    title: string,
-    description: string,
-    completed: boolean,
-    userId: string,
-    createdAt: Date,
-    updatedAt: Date,
-    status: number
-}
-
-type errorData = {
-    message: string,
-    status: number,
-}
+import { TodoRepository } from "../../domain/todo-repository"
+import { UUIDVo, AppError } from "@carbonteq/hexapp"
+import { TaskEntity, SerializedTaskEntity } from "../../domain/todo-entity"
+import { TodoDbRepo } from "../../infra/stores/todo-db-repo"
+import { FetchTodoDto, NewTodoDto, UpdateTodoDto, FetchAllUserTodoDto } from "../dto/todo.dto"
+import { AppResult } from "@carbonteq/hexapp"
 
 interface TaskServiceInterface {
-    get: (taskId: string, userId: string) => Promise<ReturnTaskData | errorData>,
-    getAllUserTasks: (userId: string, page: number) => Promise<ReturnTaskData[] | errorData>,
-    create: (taskData: TaskCreationData, userId: string) => Promise<ReturnTaskData | errorData>,
-    delete: (taskId: string, userId: string) => Promise<ReturnTaskData | errorData>,
-    update: (taskData: TaskUpdateData, taskId: string, userId: string) => Promise<ReturnTaskData | errorData>
+    get: (data: FetchTodoDto) => Promise<AppResult<SerializedTaskEntity>>,
+    getAllUserTasks: (data: FetchAllUserTodoDto) => Promise<AppResult<SerializedTaskEntity[]>>,
+    create: (data: NewTodoDto) => Promise<AppResult<SerializedTaskEntity>>,
+    delete: (data: FetchTodoDto) => Promise<AppResult<SerializedTaskEntity>>,
+    update: (data: UpdateTodoDto) => Promise<AppResult<SerializedTaskEntity>>,
 }
 
-class TaskService implements TaskServiceInterface{
-    private model: Task
-    constructor(model: Task) {
-        this.model = model
+export class TaskService implements TaskServiceInterface{
+    constructor(private readonly model: TodoRepository) {}
+
+    async get(data: FetchTodoDto): Promise<AppResult<SerializedTaskEntity>> {
+        const taskIdVo = (UUIDVo.fromStr(data.id)).unwrap()
+        const task = await this.model.fetchById(taskIdVo)
+        if (task.isErr()) {
+            return AppResult.Err(task.unwrapErr())
+        }
+        if (task.unwrap().userId !== data.userId) {
+            return AppResult.Err(AppError.Unauthorized("Unauthorized: User does not own this task"))
+        }
+        const res = task.map((task) => task.serialize());
+        return AppResult.fromResult(res);
     }
 
-    async get(taskId: string, userId: string): Promise<ReturnTaskData | errorData> {
-        const [err, task] = (await this.model.get(taskId)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 404,
-            }
+    async create(data: NewTodoDto): Promise<AppResult<SerializedTaskEntity>> {
+        const task = TaskEntity.create(data.serialize())
+        const result = await this.model.insert(task)
+        if (result.isErr()) {
+            return AppResult.Err(result.unwrapErr())
         }
-        if (task.userId !== userId) {
-            return {
-                message: "Unauthorized",
-                status: 401,
-            }
-        }
-        return {
-            message: "Task Fetched Successfully",
-            id: task.id,
-            title: task.title,
-            description: task.description,
-            completed: task.completed,
-            userId: task.userId,
-            createdAt: task.createdAt,
-            updatedAt: task.updatedAt,
-            status: 200,
-        }
+        return AppResult.fromResult(result.map((task) => task.serialize()));
     }
 
-    async getAllUserTasks(userId: string, page: number): Promise<ReturnTaskData[] | errorData> {
-        const [err, tasks] = (await this.model.getAllUserTasks(userId, page)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 404,
-            }
+    async update(data: UpdateTodoDto): Promise<AppResult<SerializedTaskEntity>> {
+        const taskIdVo = (UUIDVo.fromStr(data.id)).unwrap()
+        const currentTask = await this.model.fetchById(taskIdVo)
+        if (currentTask.isErr()) {
+            return AppResult.Err(currentTask.unwrapErr())
         }
-        return tasks.map((task) => {
-            return {
-                message: "Task Fetched Successfully",
-                id: task.id,
-                title: task.title,
-                description: task.description,
-                completed: task.completed,
-                userId: task.userId,
-                createdAt: task.createdAt,
-                updatedAt: task.updatedAt,
-                status: 200,
-            }
-        })
+        if (currentTask.unwrap().userId !== data.userId) {
+            return AppResult.Err(AppError.Unauthorized("Unauthorized: User does not own this task"))
+        }
+        const task = currentTask.unwrap()
+        const newTaskData = {
+            ...task.serialize(),
+            title: data.title??task.title,
+            description: data.description??task.description,
+            completed: data.completed??task.completed,
+        }
+        const updatedTask = new TaskEntity(newTaskData.title, newTaskData.description, newTaskData.completed, newTaskData.userId)
+        updatedTask.fromSerialized(newTaskData)
+        const result = await this.model.update(updatedTask)
+        if (result.isErr()) {
+            return AppResult.Err(result.unwrapErr())
+        }
+        return AppResult.fromResult(result.map((task) => task.serialize()));
     }
 
-    async create(taskData: TaskCreationData, userId: string): Promise<ReturnTaskData | errorData> {
-        const data = {
-            title: taskData.title || "",
-            description: taskData.description || "",
-            userId: userId,
+    async delete(data: FetchTodoDto): Promise<AppResult<SerializedTaskEntity>> {
+        const taskIdVo = (UUIDVo.fromStr(data.id)).unwrap()
+        const task = await this.model.fetchById(taskIdVo)
+        if (task.isErr()) {
+            return AppResult.Err(task.unwrapErr())
         }
-        const [err, task] = (await this.model.create(data)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 400,
-            }
+        if (task.unwrap().userId !== data.userId) {
+            return AppResult.Err(AppError.Unauthorized("Unauthorized: User does not own this task"))
         }
-        return {
-            message: "Task Created Successfully",
-            id: task.id,
-            title: task.title,
-            description: task.description,
-            completed: task.completed,
-            userId: task.userId,
-            createdAt: task.createdAt,
-            updatedAt: task.updatedAt,
-            status: 200,
-        }
-    }
-
-    async update(taskData: TaskUpdateData, taskId: string, userId: string) :Promise<ReturnTaskData | errorData>{
-        const [err, currentTask] = (await this.model.get(taskId)).intoTuple()
-        if (err) {
-            return {
-                message: "Task not found",
-                status: 404,
-            }
-        }
-        if (currentTask.userId !== userId) {
-            return {
-                message: "Unauthorized",
-                status: 401,
-            }
-        }
-        const data = {
-            id: taskId,
-            title: taskData.title || currentTask.title,
-            description: taskData.description || currentTask.description,
-            completed: taskData.completed || currentTask.completed,
-        }
-
-        const [updateErr, task] = (await this.model.update(data)).intoTuple()
-        if (updateErr) {
-            return {
-                message: updateErr.message,
-                status: 404,
-            }
-        }
-        return {
-            message: "Task Updated Successfully",
-            id: task.id,
-            title: task.title,
-            description: task.description,
-            completed: task.completed,
-            userId: task.userId,
-            createdAt: task.createdAt,
-            updatedAt: task.updatedAt,
-            status: 200,
-        }
-    }
-
-    async delete(taskId: string, userId: string): Promise<ReturnTaskData | errorData> {
-        const [err, task] = (await this.model.get(taskId)).intoTuple()
-        if (err) {
-            return {
-                message: err.message,
-                status: 404,
-            }
-        }
-        if (task.userId !== userId) {
-            return {
-                message: "Unauthorized",
-                status: 401,
-            }
-        }
-        const [deleteErr, deletedTask] = (await this.model.delete(taskId)).intoTuple()
-        if (deleteErr) {
-            return {
-                message: deleteErr.message,
-                status: 404,
-            }
+        const result = await this.model.deleteById(taskIdVo)
+        if (result.isErr()) {
+            return AppResult.Err(result.unwrapErr())
         }
         const msg :mailData = {
             subject: "Task Deleted",
-            data: `Task with id: "${deletedTask.id}" title: "${deletedTask.title}" has been deleted`,
-            userId: userId,
+            data: `Task with id: "${task.unwrap().Id.serialize()}" title: "${task.unwrap().title}" has been deleted`,
+            userId: task.unwrap().userId,
         }
         sendEmail(msg)
-        return {
-            message: "Task Deleted Successfully",
-            id: deletedTask.id,
-            title: deletedTask.title,
-            description: deletedTask.description,
-            completed: deletedTask.completed,
-            userId: deletedTask.userId,
-            createdAt: deletedTask.createdAt,
-            updatedAt: deletedTask.updatedAt,
-            status: 200,
-        }
+        return AppResult.fromResult(result.map((task) => task.serialize()));
     }
+
+    async getAllUserTasks(data: FetchAllUserTodoDto): Promise<AppResult<SerializedTaskEntity[]>> {
+        const tasks = await this.model.fetchByUserId(data.userId, data.page??1)
+        if (tasks.isErr()) {
+            return AppResult.Err(tasks.unwrapErr())
+        }
+        const unwrappedTasks = tasks.unwrap()
+        const res = unwrappedTasks.map((task) => task.serialize());
+
+        return AppResult.Ok(res);
+    }
+
 }
 
-const taskService = new TaskService(taskModel)
+const taskService = new TaskService(new TodoDbRepo())
 export { taskService, TaskServiceInterface }

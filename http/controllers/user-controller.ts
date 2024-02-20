@@ -1,7 +1,8 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import {userService, UserServiceInterface } from '../../src/app/services/user-service'
-import { Result } from 'oxide.ts'
+import { GetUserDto, NewUserDto, UpdateUserDto, UserLoginDto, UserPasswordResetDto } from '../../src/app/dto/user.dto'
+import { cleanLoginData, cleanUserData } from '../../src/utils/utils'
 dotenv.config()
 
 interface customRequest extends Request {
@@ -26,23 +27,35 @@ class UserController implements UserControllerInterface {
     }
 
     async createUser(req: Request, res: Response) {
-        const result = await Result.safe(this.service.create(req.body))
+        const dto = NewUserDto.create(req.body)
+        if (dto.isErr()) {
+            res.status(400).json(dto.unwrapErr())
+            return
+        }
+
+        const result = await this.service.create(dto.unwrap())
         if (result.isErr()) {
             res.status(500).json(result.unwrapErr())
             return
         }
         const response = result.unwrap()
-        res.status(response.status).json(response)
+        const data = await cleanLoginData(response)
+        res.status(200).json(data)
     }
 
     async login(req: Request, res: Response) {
-        const result = await Result.safe(this.service.login(req.body.username, req.body.password, req.body.email))
+        const dto = UserLoginDto.create(req.body)
+        if (dto.isErr()) {
+            res.status(400).json(dto.unwrapErr())
+            return
+        }
+        const result = await this.service.login(dto.unwrap())
         if (result.isErr()) {
             res.status(500).json(result.unwrapErr())
             return
         }
         const response = result.unwrap()
-        res.status(response.status).json(response)
+        res.status(200).json(await cleanLoginData(response))
     }
 
     async logout(req: Request, res: Response) {
@@ -51,14 +64,19 @@ class UserController implements UserControllerInterface {
 
     async updateUser(req: customRequest, res: Response) {
 
-        if (req.userId){
-            const result = await Result.safe(this.service.update(req.body, req.userId))
+        if (req.body.userId){
+            const dto = UpdateUserDto.create(req.body)
+            if (dto.isErr()) {
+                res.status(400).json(dto.unwrapErr())
+                return
+            }
+            const result = await this.service.update(dto.unwrap())
             if (result.isErr()) {
                 res.status(500).json(result.unwrapErr())
                 return
             }
             const response = result.unwrap()
-            res.status(response.status).json(response)
+            res.status(200).json(await cleanUserData(response))
         }
         else {
             res.status(400).json("Invalid Request")
@@ -66,14 +84,19 @@ class UserController implements UserControllerInterface {
     }
 
     async deleteUser(req: customRequest, res: Response) {
-        if (req.userId){
-            const result = await Result.safe(this.service.delete(req.userId))
+        if (req.body.userId){
+            const dto = GetUserDto.create({userId: req.body.userId})
+            if (dto.isErr()) {
+                res.status(400).json(dto.unwrapErr())
+                return
+            }
+            const result = await this.service.delete(dto.unwrap())
             if (result.isErr()) {
                 res.status(500).json(result.unwrapErr())
                 return
             }
             const response = result.unwrap()
-            res.status(response.status).json(response)
+            res.status(200).json(response)
         }
         else {
             res.status(400).json("Invalid Request")
@@ -81,14 +104,19 @@ class UserController implements UserControllerInterface {
     }
 
     async getUser(req: customRequest, res: Response) {
-        if (req.userId){
-            const result = await Result.safe(this.service.get(req.userId))
+        if (req.body.userId){
+            const dto =  GetUserDto.create({userId: req.body.userId})
+            if (dto.isErr()) {
+                res.status(400).json(dto.unwrapErr())
+                return
+            }
+            const result = await this.service.get(dto.unwrap())
             if (result.isErr()) {
                 res.status(500).json(result.unwrapErr())
                 return
             }
             const response = result.unwrap()
-            res.status(response.status).json(response)
+            res.status(200).json(await cleanUserData(response))
         }
         else {
             res.status(400).json("Invalid Request")
@@ -96,14 +124,19 @@ class UserController implements UserControllerInterface {
     }
 
     async changePassword(req: customRequest, res: Response) {
-        if (req.userId){
-            const result = await Result.safe(this.service.changePassword(req.body.oldPassword, req.body.newPassword, req.userId))
+        if (req.body.userId){
+            const dto = UserPasswordResetDto.create(req.body)
+            if (dto.isErr()) {
+                res.status(400).json(dto.unwrapErr())
+                return
+            }
+            const result = await this.service.changePassword(dto.unwrap())
             if (result.isErr()) {
                 res.status(500).json(result.unwrapErr())
                 return
             }
             const response = result.unwrap()
-            res.status(response.status).json(response)
+            res.status(200).json(await cleanUserData(response))
         }
         else {
             res.status(400).json("Invalid Request")
