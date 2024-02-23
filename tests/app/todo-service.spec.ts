@@ -5,6 +5,7 @@ import sinon from "sinon";
 import { AppResult } from "@carbonteq/hexapp";
 import * as taskDtos from "../../src/app/dto/todo.dto";
 import { Result } from "@carbonteq/fp";
+import  {mailService} from "../../src/infra/mail-service";
 
 describe('TaskService', () => {
     afterEach(async () => {
@@ -123,6 +124,7 @@ describe('TaskService', () => {
                 updatedAt: new Date(),
                 createdAt: new Date()
             })
+            const mailStub = sinon.stub(mailService, "sendEmail").resolves();
             prisma.todo.findUnique = sinon.stub().resolves(data);
             prisma.todo.delete = sinon.stub().resolves(data);
             const taskDto = taskDtos.FetchTodoDto.create(task);

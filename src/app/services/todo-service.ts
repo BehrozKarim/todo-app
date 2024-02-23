@@ -1,4 +1,4 @@
-import { sendEmail } from "../../infra/mail-service"
+import { mailService } from "../../infra/mail-service"
 import { mailData } from "../../utils/utils"
 import { TodoRepository } from "../../domain/todo-repository"
 import { UUIDVo, AppError } from "@carbonteq/hexapp"
@@ -87,7 +87,7 @@ export class TaskService implements TaskServiceInterface{
             data: `Task with id: "${task.unwrap().Id.serialize()}" title: "${task.unwrap().title}" has been deleted`,
             userId: task.unwrap().userId,
         }
-        sendEmail(msg)
+        mailService.sendEmail(msg)
         return AppResult.fromResult(result.map((task) => task.serialize()));
     }
 
