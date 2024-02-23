@@ -10,6 +10,7 @@ const db = new TodoDbRepo();
 describe('TodoDbRepo', () => {
     
     afterEach(async () => {
+        sinon.reset();
         sinon.restore();
     });
 

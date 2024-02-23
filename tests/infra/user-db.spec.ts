@@ -10,6 +10,7 @@ const db = new UserDbRepo();
 describe('UserDbRepo', () => {
 
     afterEach(async () => {
+        sinon.reset();
         sinon.restore();
     });
 
