@@ -11,6 +11,7 @@
     "seed": "ts-node prisma/seed.ts",
     "generate:swagger": "npx swagger-autogen -i public/bin/www -o public/swagger.json"
   },
+  "type": "module",
   "keywords": [],
   "author": "Behroz Karim",
   "license": "ISC",
@@ -55,6 +56,7 @@
     "mocha": "^10.3.0",
     "nodemon": "^3.0.2",
     "prisma": "^5.7.1",
+    "sinon": "^17.0.1",
     "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0"

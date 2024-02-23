@@ -7,8 +7,9 @@ import { UserEntity } from '../../domain/user-entity';
 import { UserAlreadyExistsError, UserNotFoundError, UserInvalidOperationError } from '../../domain/user-entity-exceptions';
 import { UserRepository } from '../../domain/user-repository';
 import { PrismaClient } from '@prisma/client';
+import prisma from '../../../client/prisma-client';
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient();
 
 export class UserDbRepo extends UserRepository {
     async fetchByUsername(username: string): Promise<RepositoryResult<UserEntity, UserNotFoundError>> {
