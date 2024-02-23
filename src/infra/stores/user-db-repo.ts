@@ -19,7 +19,13 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(username, "username")
                 return fp.Result.Err(err)
             }
-            const ent = new UserEntity( user.username, user.email, user.password??undefined, user.name??undefined )
+            const ent = UserEntity.create({
+                name: user.name??undefined,
+                username: user.username,
+                email: user.email,
+                password: user.password??undefined,
+            })
+
             const data = {
                 Id: user.userId,
                 name: user.name??undefined,
@@ -46,7 +52,13 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(email, "email")
                 return fp.Result.Err(err)
             }
-            const ent = new UserEntity(user.username, user.email, user.password??undefined, user.name??undefined)
+            const ent = UserEntity.create({
+                name: user.name??undefined,
+                username: user.username,
+                email: user.email,
+                password: user.password??undefined,
+            })
+
             const data = {
                 Id: user.userId,
                 name: user.name??undefined,
@@ -114,7 +126,13 @@ export class UserDbRepo extends UserRepository {
                 where: { userId: Id.serialize() },
             })
             
-            const ent = new UserEntity(user.username, user.email, user.password??undefined, user.name??undefined)
+            const ent = UserEntity.create({
+                name: user.name??undefined,
+                username: user.username,
+                email: user.email,
+                password: user.password??undefined,
+            })
+
             const data = {
                 Id: user.userId,
                 name: user.name??undefined,
@@ -145,7 +163,13 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(id.serialize(), "id")
                 return fp.Result.Err(err)
             }
-            const ent = new UserEntity(user.username, user.email, user.password??undefined, user.name??undefined)
+            const ent = UserEntity.create({
+                name: user.name??undefined,
+                username: user.username,
+                email: user.email,
+                password: user.password??undefined,
+            })
+
             const data = {
                 Id: user.userId,
                 name: user.name??undefined,

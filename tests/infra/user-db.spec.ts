@@ -22,7 +22,7 @@ describe('UserDbRepo', () => {
                 email: "janesmith@gmail.com",
                 password: "password",
             };
-            const uEntity = new UserEntity(user.username, user.email, user.password, user.name);
+            const uEntity = UserEntity.create({username: user.username, email: user.email, password: user.password, name: user.name});
             const data = {
                 userId: uEntity.Id.serialize(),
                 name: uEntity.name??null,
@@ -46,7 +46,7 @@ describe('UserDbRepo', () => {
                 email: "janesmith@gmail.com",
                 password: "password",
             };
-            const uEntity = new UserEntity(user.username, user.email, user.password, user.name);
+            const uEntity = UserEntity.create({username: user.username, email: user.email, password: user.password, name: user.name});
             const data = {
                 userId: uEntity.Id.serialize(),
                 name: uEntity.name??null,
@@ -71,7 +71,7 @@ describe('UserDbRepo', () => {
                 email: "janesmith@gmail.com",
                 password: "password",
             };
-            const uEntity = new UserEntity(user.username, user.email, user.password, user.name);
+            const uEntity = UserEntity.create({username: user.username, email: user.email, password: user.password, name: user.name});
             const data = {
                 userId: uEntity.Id.serialize(),
                 name: uEntity.name??null,
@@ -95,7 +95,7 @@ describe('UserDbRepo', () => {
                 email: "janesmith@gmail.com",
                 password: "password",
             };
-            const uEntity = new UserEntity(user.username, user.email, user.password, user.name);
+            const uEntity = UserEntity.create({username: user.username, email: user.email, password: user.password, name: user.name});
             const data = {
                 userId: uEntity.Id.serialize(),
                 name: uEntity.name??null,
@@ -119,7 +119,7 @@ describe('UserDbRepo', () => {
                 email: "janesmith@gmail.com",
                 password: "password",
             };
-            const uEntity = new UserEntity(user.username, user.email, undefined, user.name);
+            const uEntity = UserEntity.create({username: user.username, email: user.email, password: undefined, name: user.name});
             const data = {
                 userId: uEntity.Id.serialize(),
                 name: uEntity.name??null,
@@ -142,7 +142,7 @@ describe('UserDbRepo', () => {
                 username: "jane_smith",
                 email: "janesmith@gmail.com",
             };
-            const uEntity = new UserEntity(user.username, user.email, undefined, user.name);
+            const uEntity = UserEntity.create({username: user.username, email: user.email, name: user.name});
             const data = {
                 userId: uEntity.Id.serialize(),
                 name: uEntity.name??null,

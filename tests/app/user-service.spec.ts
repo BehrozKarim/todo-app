@@ -90,12 +90,14 @@ describe('UserService', () => {
             prisma.user.findUnique = sinon.stub().resolves(data);
             prisma.user.update = sinon.stub().resolves(data);
             const result = await userService.update(userUpdateDto.unwrap());
-            let newData = {
-                ...data,
-                Id: data.userId
-            }
-            delete (newData as any).userId;
-            expect(result).to.deep.equal(AppResult.fromResult(Result.Ok(newData)));
+            const userEnt = result.unwrap()
+            expect(userEnt.name).to.equal(data.name);
+            expect(userEnt.username).to.equal(data.username);
+            expect(userEnt.email).to.equal(data.email);
+            expect(userEnt.createdAt).to.equal(data.createdAt);
+            expect(userEnt.updatedAt).to.not.equal(data.updatedAt);
+            expect(userEnt.Id).to.equal(data.userId);
+            expect(userEnt.password).to.equal(data.password);
         });
     });
 
@@ -178,7 +180,7 @@ describe('UserService', () => {
             expect(userEnt.username).to.equal(data.username);
             expect(userEnt.email).to.equal(data.email);
             expect(userEnt.createdAt).to.equal(data.createdAt);
-            expect(userEnt.updatedAt).to.equal(data.updatedAt);
+            expect(userEnt.updatedAt).to.not.equal(data.updatedAt);
             expect(userEnt.Id).to.equal(data.userId);
             expect(await bcrypt.compare("new_password", userEnt.password??"")).to.equal(true);
         });

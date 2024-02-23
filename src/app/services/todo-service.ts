@@ -56,7 +56,11 @@ export class TaskService implements TaskServiceInterface{
             description: data.description??task.description,
             completed: data.completed??task.completed,
         }
-        const updatedTask = new TaskEntity(newTaskData.title, newTaskData.description, newTaskData.completed, newTaskData.userId)
+        const updatedTask = TaskEntity.create({
+            title: newTaskData.title,
+            description: newTaskData.description,
+            userId: newTaskData.userId,
+        })
         updatedTask.fromSerialized(newTaskData)
         const result = await this.model.update(updatedTask)
         if (result.isErr()) {

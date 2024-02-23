@@ -22,7 +22,7 @@ describe('TodoDbRepo', () => {
                 completed: false,
                 userId: "1234",
             };
-            const tEntity = new TaskEntity(todo.title, todo.description, todo.completed, todo.userId);
+            const tEntity = TaskEntity.create({title: todo.title, description: todo.description, userId: todo.userId});
             const data = {
                 id: tEntity.Id.serialize(),
                 title: tEntity.title,
@@ -46,7 +46,7 @@ describe('TodoDbRepo', () => {
                 completed: false,
                 userId: "1234",
             };
-            const tEntity = new TaskEntity(todo.title, todo.description, todo.completed, todo.userId);
+            const tEntity = TaskEntity.create({title: todo.title, description: todo.description, userId: todo.userId});
             const data = {
                 id: tEntity.Id.serialize(),
                 title: tEntity.title,
@@ -71,7 +71,7 @@ describe('TodoDbRepo', () => {
                 completed: false,
                 userId: "1234",
             };
-            const tEntity = new TaskEntity(todo.title, todo.description, todo.completed, todo.userId);
+            const tEntity = TaskEntity.create({title: todo.title, description: todo.description, userId: todo.userId});
             const data = {
                 id: tEntity.Id.serialize(),
                 title: tEntity.title,
@@ -95,7 +95,7 @@ describe('TodoDbRepo', () => {
                 completed: false,
                 userId: "1234",
             };
-            const tEntity = new TaskEntity(todo.title, todo.description, todo.completed, todo.userId);
+            const tEntity = TaskEntity.create({title: todo.title, description: todo.description, userId: todo.userId});
             const data = {
                 id: tEntity.Id.serialize(),
                 title: tEntity.title,
@@ -119,7 +119,7 @@ describe('TodoDbRepo', () => {
                 completed: false,
                 userId: "1234",
             };
-            const tEntity = new TaskEntity(todo.title, todo.description, todo.completed, todo.userId);
+            const tEntity = TaskEntity.create({title: todo.title, description: todo.description, userId: todo.userId});
             const data = {
                 id: tEntity.Id.serialize(),
                 title: tEntity.title,

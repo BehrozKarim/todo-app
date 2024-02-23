@@ -93,8 +93,12 @@ export class UserService implements UserServiceInterface{
             name: data.name? data.name: user.unwrap().name,
             username: data.username? data.username: user.unwrap().username,
             email: data.email? data.email: user.unwrap().email,
+            updatedAt: new Date()
         }
-        const updatedUser = new UserEntity(newUserData.username, newUserData.email)
+        let updatedUser = UserEntity.create({
+            username: newUserData.username,
+            email: newUserData.email
+        })
         updatedUser.fromSerialized(newUserData)
         const result = await this.model.update(updatedUser)
         if (result.isErr()) {
@@ -118,10 +122,15 @@ export class UserService implements UserServiceInterface{
             return AppResult.Err(AppError.InvalidData("Invalid Credentials"))
         }
         const passwordHash = await bcrypt.hash(data.newPassword, 10)
-        let updatedUser = new UserEntity(currentDetails.username, currentDetails.email)
+        let updatedUser = UserEntity.create({
+            username: currentDetails.username,
+            email: currentDetails.email
+        })
+
         let serializedUser = {
             ...currentDetails.serialize(),
-            password: passwordHash
+            password: passwordHash,
+            updatedAt: new Date()
         }
 
         updatedUser.fromSerialized(serializedUser)

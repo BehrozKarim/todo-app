@@ -21,7 +21,11 @@ export class TodoDbRepo extends TodoRepository {
                 return fp.Result.Err(new TaskNotFoundError(id.serialize()))
             }
 
-            const ent = new TaskEntity(task.title, task.description, task.completed, task.userId)
+            const ent = TaskEntity.create({
+                title: task.title,
+                description: task.description,
+                userId: task.userId,
+            })
             const data = {
                 Id: task.id,
                 title: task.title,
@@ -66,7 +70,11 @@ export class TodoDbRepo extends TodoRepository {
                 return fp.Result.Err(new TaskNotFoundError(Id.serialize()))
             }
 
-            const ent = new TaskEntity(task.title, task.description, task.completed, task.userId)
+            const ent = TaskEntity.create({
+                title: task.title,
+                description: task.description,
+                userId: task.userId,
+            })
             const data = {
                 Id: task.id,
                 title: task.title,
@@ -105,7 +113,11 @@ export class TodoDbRepo extends TodoRepository {
                     updatedAt: task.updatedAt,
                     createdAt: task.createdAt
                 }
-                const ent = new TaskEntity(task.title, task.description, task.completed, task.userId)
+                const ent = TaskEntity.create({
+                    title: task.title,
+                    description: task.description,
+                    userId: task.userId,
+                })
                 ent.fromSerialized(data)
                 return ent
             })
@@ -131,7 +143,11 @@ export class TodoDbRepo extends TodoRepository {
                 return fp.Result.Err(new TaskNotFoundError(entity.Id.serialize()))
             }
 
-            const ent = new TaskEntity(task.title, task.description, task.completed, task.userId)
+            const ent = TaskEntity.create({
+                title: task.title,
+                description: task.description,
+                userId: task.userId,
+            })
             const data = {
                 Id: task.id,
                 title: task.title,
