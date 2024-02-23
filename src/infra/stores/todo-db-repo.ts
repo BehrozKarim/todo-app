@@ -7,10 +7,8 @@ import * as fp from '@carbonteq/fp';
 import { TaskEntity } from '../../domain/todo-entity';
 import { TaskNotFoundError, TaskAlreadyExistsError, TaskInvalidOperationError } from '../../domain/todo-entity-exceptions';
 import { TodoRepository } from '../../domain/todo-repository';
-
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '../../../client/prisma-client';
+// const prisma = new PrismaClient();
 
 export class TodoDbRepo extends TodoRepository {
     async fetchById(id: UUIDVo): Promise<RepositoryResult<TaskEntity, TaskNotFoundError>> {
