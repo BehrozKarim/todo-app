@@ -11,7 +11,6 @@
     "seed": "ts-node prisma/seed.ts",
     "generate:swagger": "npx swagger-autogen -i public/bin/www -o public/swagger.json"
   },
-  "type": "module",
   "keywords": [],
   "author": "Behroz Karim",
   "license": "ISC",
