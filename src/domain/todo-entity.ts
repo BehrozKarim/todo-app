@@ -1,6 +1,6 @@
 import {Result} from 'oxide.ts'
 import { TaskNotFoundError, TaskAlreadyExistsError, TaskInvalidOperationError } from './todo-entity-exceptions'
-import {BaseEntity, IEntity, SerializedEntity} from "@carbonteq/hexapp"
+import {BaseEntity, DateTime, IEntity, SerializedEntity} from "@carbonteq/hexapp"
 
 export interface ITask extends IEntity {
     title: string,
@@ -14,6 +14,7 @@ export interface SerializedTaskEntity extends SerializedEntity {
     description: string,
     completed: boolean,
     userId: string,
+    updatedAt: DateTime
 }
 
 export class TaskEntity extends BaseEntity implements ITask{
@@ -22,7 +23,7 @@ export class TaskEntity extends BaseEntity implements ITask{
     private _completed: boolean
     private _userId: string
 
-    constructor(title: string, description: string, completed: boolean, userId: string) {
+    private constructor(title: string, description: string, completed: boolean, userId: string) {
         super()
         this._title = title
         this._description = description

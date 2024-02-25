@@ -4,7 +4,7 @@ import { z } from "zod";
 export class NewTodoDto extends BaseDto {
     private static readonly schema = z.object({
         userId: z.string().min(36),
-        title: z.string(),
+        title: z.string().min(1),
         description: z.string(),
     });
 

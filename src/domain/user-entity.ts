@@ -1,4 +1,4 @@
-import {BaseEntity, IEntity, SerializedEntity} from "@carbonteq/hexapp"
+import {BaseEntity, DateTime, IEntity, SerializedEntity} from "@carbonteq/hexapp"
 
 type userSignUpData = {
     name?: string,
@@ -19,14 +19,16 @@ export interface SerializedUserEntity extends SerializedEntity {
     username: string,
     email: string,
     password?: string,
+    updatedAt: DateTime,
 }
+
 export class UserEntity extends BaseEntity implements IUser{
     private _name?: string
     private _username: string
     private _email: string
     private _password?: string
 
-    constructor(username: string, email: string, password?: string, name?: string) {
+    private constructor(username: string, email: string, password?: string, name?: string) {
         super()
         this._name = name
         this._username = username
