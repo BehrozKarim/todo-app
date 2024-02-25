@@ -1,7 +1,9 @@
+require('newrelic')
 import dotenv from "dotenv"
 import app from "../http/app/bootstrap"
 import logger from "../src/infra/logger"
 import { program } from "commander"
+import relic from "newrelic"
 dotenv.config()
 
 program
