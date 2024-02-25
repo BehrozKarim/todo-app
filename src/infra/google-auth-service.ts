@@ -1,7 +1,9 @@
 import {google} from 'googleapis';
-import {userModel} from '../../infra/stores/user-store';
-import { createToken } from '../../utils/utils';
-import logger from '../../infra/logger';
+import { UserDbRepo } from './stores/user-db-repo';
+import { UserRepository } from '../domain/user-repository';
+import { UserEntity } from '../domain/user-entity';
+import { createToken } from '../utils/utils';
+import logger from './logger';
 
 const oAuth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -10,6 +12,7 @@ const oAuth2Client = new google.auth.OAuth2(
 );
 
 export const googleAuthCallbackService = async (code: string) => {
+    const repo: UserRepository = new UserDbRepo();
     if (code) {
         try {
             const {tokens} = await oAuth2Client.getToken(code.toString());
@@ -20,46 +23,47 @@ export const googleAuthCallbackService = async (code: string) => {
             });
             const {data} = await oauth2.userinfo.get();
             if (data.email && data.name ) {
-                const [err, user] = (await userModel.findByEmail(data.email? data.email: '')).intoTuple();
-                if (err) {
-                    logger.error(err.message);
-                    return {
-                        message: err.message,
-                        status: 404,
-                    };
-                }
-                else if (user) {
-                    const token = await createToken(user);
+                const user = await repo.fetchByEmail(data.email);
+                if (user.isOk()) {
+                    const token = await createToken({userId: user.unwrap().Id.serialize()});
                     return {
                         status: 200,
                         token: token,
-                        id: user.userId,
-                        name: user.name,
-                        email: user.email,
+                        id: user.unwrap().Id,
+                        name: user.unwrap().name,
+                        email: user.unwrap().email,
                     };
                 }
-                else if (!user) {
-                    const [createErr, newUser] = (await userModel.create({
+                else if (user.isErr()) {
+                    const newUser = UserEntity.create({
                         name: data.name,
                         email: data.email,
                         username: data.email,
                         password: '',
-                    })).intoTuple();
-                    if (createErr) {
-                        logger.error(createErr.message);
-                        return {
-                            message: createErr.message,
-                            status: 400,
-                        };
-                    }
-                    else if (newUser) {
-                        const token = await createToken(newUser);
+                    });
+                    const createdUser = await repo.insert(newUser);
+                    if (createdUser.isOk()) {
+                        const token = await createToken({userId: createdUser.unwrap().Id.serialize()});
                         return {
                             status: 201,
                             token: token,
-                            id: newUser.userId,
-                            name: newUser.name,
-                            email: newUser.email,
+                            id: createdUser.unwrap().Id,
+                            name: createdUser.unwrap().name,
+                            email: createdUser.unwrap().email,
+                        };
+                    }
+                    else if (createdUser.isErr()) {
+                        logger.error(createdUser.unwrapErr().message);
+                        return {
+                            message: createdUser.unwrapErr().message,
+                            status: 400,
+                        };
+                    }
+                    else {
+                        logger.error(user.unwrapErr().message);
+                        return {
+                            message: user.unwrapErr().message,
+                            status: 404,
                         };
                     }
                 }

@@ -1,4 +1,4 @@
-import { NotFoundError, AlreadyExistsError, InvalidOperationError } from "./store-errors";
+import { AlreadyExistsError, NotFoundError, InvalidOperation } from '@carbonteq/hexapp';
 
 export class UserNotFoundError extends NotFoundError {
     constructor(idOrUsernameOrEmail: string, type: 'id' | 'username' | 'email') {
@@ -12,7 +12,7 @@ export class UserAlreadyExistsError extends AlreadyExistsError {
     }
 }
 
-export class UserInvalidOperationError extends InvalidOperationError {
+export class UserInvalidOperationError extends InvalidOperation {
     constructor(message: string) {
         super(message);
     }

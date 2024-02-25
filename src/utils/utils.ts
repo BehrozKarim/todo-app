@@ -1,30 +1,14 @@
-// validate username doesn't exist already
-import { PrismaClient } from '@prisma/client'
 import * as jwt from 'jsonwebtoken'
-import {userModel} from '../infra/stores/user-store'
-
-const prisma = new PrismaClient()
+import { SerializedUserEntity } from '../domain/user-entity'
 
 type User = {
     userId: string,
 }
 
-async function usernameExists(username: string) {
-    const [err, user] = (await userModel.findByUsername(username)).intoTuple()
-    if (user) {
-        return true
-    } else {
-        return false
-    }
-}
-
-async function emailExists(email: string) {
-    const [err, user] = (await userModel.findByEmail(email)).intoTuple()
-    if (user) {
-        return true
-    } else {
-        return false
-    }
+type mailData = {
+    subject: string,
+    data: string,
+    userId: string,
 }
 
 async function createToken(user: User) {
@@ -36,4 +20,29 @@ async function createToken(user: User) {
     return token
 }
 
-export { usernameExists, createToken, emailExists }
+export async function cleanLoginData(data: SerializedUserEntity){
+    const token = await createToken({userId: data.Id})
+    const user = {
+        token: token,
+        userId: data.Id,
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        updatedAt: data.updatedAt,
+        createdAt: data.createdAt,
+    }
+    return user
+}
+
+export async function cleanUserData(data: SerializedUserEntity){
+    return {
+        userId: data.Id,
+        name: data.name,
+        username: data.username,
+        email: data.email,
+        updatedAt: data.updatedAt,
+        createdAt: data.createdAt,
+    }
+}
+
+export { createToken, mailData }

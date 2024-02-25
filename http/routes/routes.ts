@@ -2,7 +2,6 @@ import express from "express"
 import userController from "../controllers/user-controller"
 import {isAuthenticated} from "../middlewares/auth-middleware"
 import { googleAuth, googleAuthCallback } from "../controllers/google-auth-controller"
-import * as validate from "../middlewares/validate-middleware"
 import todoController from "../controllers/todo-controller"
 const router = express.Router()
 
@@ -16,11 +15,11 @@ router.get("/", (req, res) => {
 })
 
 // User APIs
-router.post("/signup", validate.validateSignup, userController.createUser.bind(userController))
+router.post("/signup", userController.createUser.bind(userController))
 
-router.post("/login", validate.validateLogin, userController.login.bind(userController))
+router.post("/login", userController.login.bind(userController))
 
-router.post("/change-password", isAuthenticated, validate.validateResetPassword, userController.changePassword.bind(userController))
+router.post("/change-password", isAuthenticated, userController.changePassword.bind(userController))
 
 router.get("/logout", isAuthenticated, userController.logout.bind(userController))
 
@@ -29,7 +28,7 @@ router.route("/user")
         isAuthenticated, userController.getUser.bind(userController)
     )
     .put(
-        isAuthenticated, validate.validateUpdateUser,
+        isAuthenticated,
         userController.updateUser.bind(userController)
     )
     .delete(
@@ -41,26 +40,25 @@ router.route("/user")
 // TODO List APIs
 router.route("/todo")
     .post(
-        isAuthenticated, validate.validateTodoSchema,
+        isAuthenticated,
         todoController.createTask.bind(todoController)
     )
     .get(
-        isAuthenticated, validate.validateAllTasksQuery,
+        isAuthenticated,
         todoController.getAllUserTasks.bind(todoController)
     )
 
 router.route("/todo/:id")
     .get(
-        isAuthenticated, validate.validateIdSchema,
+        isAuthenticated, 
         todoController.getTask.bind(todoController)
     )
     .put(
-        isAuthenticated, validate.validateIdSchema,
-        validate.validateUpdateTodoSchema,
+        isAuthenticated,
         todoController.updateTask.bind(todoController)
     )
     .delete(
-        isAuthenticated, validate.validateIdSchema,
+        isAuthenticated,
         todoController.deleteTask.bind(todoController)
     )
 
