@@ -1,24 +1,5 @@
 // 'use strict'
-// exports.config = {
-//   app_name: ['todo-app'],
-//   license_key: '1234567890',
-//   allow_all_headers: true,
-//   attributes: {
-//     exclude: [
-//       'request.headers.cookie',
-//       'request.headers.authorization',
-//       'request.headers.proxyAuthorization',
-//       'request.headers.setCookie*',
-//       'request.headers.x*',
-//       'response.headers.cookie',
-//       'response.headers.authorization',
-//       'response.headers.proxyAuthorization',
-//       'response.headers.setCookie*',
-//       'response.headers.x*'
-//     ]
-//   }
-// }
-'use strict'
+require('dotenv').config()
 /**
  * New Relic agent configuration.
  *
@@ -33,7 +14,7 @@ exports.config = {
   /**
    * Your New Relic license key.
    */
-  license_key: '432ab223380ff3da8f854a18e86ce4b2FFFFNRAL',
+  license_key: process.env.NEW_RELIC_LICENSE_KEY,
   logging: {
     /**
      * Level at which to log. 'trace' is most useful to New Relic when diagnosing
