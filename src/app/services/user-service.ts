@@ -87,20 +87,15 @@ export class UserService implements UserServiceInterface{
                 return AppResult.Err(AppError.InvalidData("Username already exists"))
             }
         }
-
-        const newUserData = {
-            ...user.unwrap().serialize(),
-            name: data.name? data.name: user.unwrap().name,
-            username: data.username? data.username: user.unwrap().username,
-            email: data.email? data.email: user.unwrap().email,
-            updatedAt: new Date()
+        const userEnt = user.unwrap()
+        const newData = {
+            name: data.name || userEnt.name,
+            username: data.username || userEnt.username,
+            email: data.email || userEnt.email,
         }
-        let updatedUser = UserEntity.create({
-            username: newUserData.username,
-            email: newUserData.email
-        })
-        updatedUser.fromSerialized(newUserData)
-        const result = await this.model.update(updatedUser)
+
+        userEnt.update(newData)
+        const result = await this.model.update(userEnt)
         if (result.isErr()) {
             return AppResult.Err(result.unwrapErr())
         }
@@ -122,19 +117,9 @@ export class UserService implements UserServiceInterface{
             return AppResult.Err(AppError.InvalidData("Invalid Credentials"))
         }
         const passwordHash = await bcrypt.hash(data.newPassword, 10)
-        let updatedUser = UserEntity.create({
-            username: currentDetails.username,
-            email: currentDetails.email
-        })
+        currentDetails.password = passwordHash
 
-        let serializedUser = {
-            ...currentDetails.serialize(),
-            password: passwordHash,
-            updatedAt: new Date()
-        }
-
-        updatedUser.fromSerialized(serializedUser)
-        const result = await this.model.update(updatedUser)
+        const result = await this.model.update(currentDetails)
         if (result.isErr()) {
             return AppResult.Err(result.unwrapErr())
         }

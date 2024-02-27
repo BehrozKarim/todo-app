@@ -1,4 +1,5 @@
 import {BaseEntity, DateTime, IEntity, SerializedEntity} from "@carbonteq/hexapp"
+import { UUIDVo } from "@carbonteq/hexapp"
 
 type userSignUpData = {
     name?: string,
@@ -52,16 +53,30 @@ export class UserEntity extends BaseEntity implements IUser{
         return this._password
     }
 
+    set password(password: string | undefined) {
+        this._password = password
+    }
+
     static create(data: userSignUpData): UserEntity {
         return new UserEntity(data.username, data.email, data.password, data.name)
     }
 
-    fromSerialized(other: SerializedUserEntity): void {
-        super._fromSerialized(other)
-        this._name = other.name
-        this._username = other.username
-        this._email = other.email
-        this._password = other.password
+    update(data : userSignUpData) {
+        this._name = data.name
+        this._username = data.username
+        this._email = data.email
+        super.markUpdated()
+    }
+
+    static fromSerialized(other: SerializedUserEntity): UserEntity {
+        const user = new UserEntity(other.username, other.email, other.password, other.name)
+        const id = UUIDVo.fromStr(other.Id).unwrap()
+        user._copyBaseProps({
+            Id: id,
+            createdAt: other.createdAt,
+            updatedAt: other.updatedAt
+        })
+        return user
     }
 
     serialize() :SerializedUserEntity{

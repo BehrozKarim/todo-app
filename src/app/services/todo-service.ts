@@ -50,19 +50,8 @@ export class TaskService implements TaskServiceInterface{
             return AppResult.Err(AppError.Unauthorized("Unauthorized: User does not own this task"))
         }
         const task = currentTask.unwrap()
-        const newTaskData = {
-            ...task.serialize(),
-            title: data.title??task.title,
-            description: data.description??task.description,
-            completed: data.completed??task.completed,
-        }
-        const updatedTask = TaskEntity.create({
-            title: newTaskData.title,
-            description: newTaskData.description,
-            userId: newTaskData.userId,
-        })
-        updatedTask.fromSerialized(newTaskData)
-        const result = await this.model.update(updatedTask)
+        task.update(data.serialize())
+        const result = await this.model.update(task)
         if (result.isErr()) {
             return AppResult.Err(result.unwrapErr())
         }
