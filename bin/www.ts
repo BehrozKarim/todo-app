@@ -1,4 +1,5 @@
 require('newrelic')
+import 'reflect-metadata'
 import dotenv from "dotenv"
 import app from "../http/app/bootstrap"
 import logger from "../src/infra/logger"

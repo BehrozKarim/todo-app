@@ -35,8 +35,6 @@ router.route("/user")
         isAuthenticated, userController.deleteUser
     )
 
-
-
 // TODO List APIs
 router.route("/todo")
     .post(

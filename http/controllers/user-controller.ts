@@ -1,8 +1,9 @@
 import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
-import {userService, UserServiceInterface } from '../../src/app/services/user-service'
+import {UserService, UserServiceInterface } from '../../src/app/services/user-service'
 import { GetUserDto, NewUserDto, UpdateUserDto, UserLoginDto, UserPasswordResetDto } from '../../src/app/dto/user.dto'
 import { cleanLoginData, cleanUserData } from '../../src/utils/utils'
+import { inject, injectable, container } from 'tsyringe'
 dotenv.config()
 
 interface customRequest extends Request {
@@ -19,14 +20,12 @@ interface UserControllerInterface {
     changePassword: (req: customRequest, res: Response) => Promise<void>
 }
 
+container.register<UserServiceInterface>("UserServiceInterface", { useClass: UserService })
+@injectable()
 class UserController implements UserControllerInterface {
-    private service: UserServiceInterface
+    constructor(@inject("UserServiceInterface") private readonly service: UserServiceInterface) {}
 
-    constructor(service: UserServiceInterface) {
-        this.service = service
-    }
-
-    async createUser(req: Request, res: Response) {
+    createUser = async (req: Request, res: Response) => {
         const dto = NewUserDto.create(req.body)
         if (dto.isErr()) {
             res.status(400).json(dto.unwrapErr())
@@ -43,7 +42,7 @@ class UserController implements UserControllerInterface {
         res.status(200).json(data)
     }
 
-    async login(req: Request, res: Response) {
+    login = async (req: Request, res: Response) => {
         const dto = UserLoginDto.create(req.body)
         if (dto.isErr()) {
             res.status(400).json(dto.unwrapErr())
@@ -58,11 +57,11 @@ class UserController implements UserControllerInterface {
         res.status(200).json(await cleanLoginData(response))
     }
 
-    async logout(req: Request, res: Response) {
+    logout = async (req: Request, res: Response) => {
         res.json("Logged out")
     }
 
-    async updateUser(req: customRequest, res: Response) {
+    updateUser = async (req: customRequest, res: Response) => {
 
         if (req.body.userId){
             const dto = UpdateUserDto.create(req.body)
@@ -83,7 +82,7 @@ class UserController implements UserControllerInterface {
         }
     }
 
-    async deleteUser(req: customRequest, res: Response) {
+    deleteUser = async (req: customRequest, res: Response) => {
         if (req.body.userId){
             const dto = GetUserDto.create({userId: req.body.userId})
             if (dto.isErr()) {
@@ -103,7 +102,7 @@ class UserController implements UserControllerInterface {
         }
     }
 
-    async getUser(req: customRequest, res: Response) {
+    getUser = async (req: customRequest, res: Response) => {
         if (req.body.userId){
             const dto =  GetUserDto.create({userId: req.body.userId})
             if (dto.isErr()) {
@@ -123,7 +122,7 @@ class UserController implements UserControllerInterface {
         }
     }
 
-    async changePassword(req: customRequest, res: Response) {
+    changePassword = async (req: customRequest, res: Response) => {
         if (req.body.userId){
             const dto = UserPasswordResetDto.create(req.body)
             if (dto.isErr()) {
@@ -144,5 +143,5 @@ class UserController implements UserControllerInterface {
     }
 }
 
-const controller : UserControllerInterface = new UserController(userService)
+const controller : UserControllerInterface = container.resolve(UserController)
 export default controller

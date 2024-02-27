@@ -2,12 +2,10 @@ import * as bcrypt from 'bcrypt'
 import { UserEntity, SerializedUserEntity } from "../../domain/user-entity";
 import { UserRepository } from "../../domain/user-repository";
 import { UserDbRepo } from "../../infra/stores/user-db-repo";
-import { UUIDVo } from "@carbonteq/hexapp";
-import { AppResult } from "@carbonteq/hexapp";
+import { AppResult, AppError, UUIDVo } from "@carbonteq/hexapp";
 import { NewUserDto, UpdateUserDto, UserLoginDto, GetUserDto, UserPasswordResetDto } from "../dto/user.dto";
-import { AppError } from '@carbonteq/hexapp';
-
-interface UserServiceInterface {
+import { injectable, inject, container } from 'tsyringe';
+export interface UserServiceInterface {
     get: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
     create: (data: NewUserDto) => Promise<AppResult<SerializedUserEntity>>,
     login: (data: UserLoginDto) => Promise<AppResult<SerializedUserEntity>>,
@@ -16,8 +14,10 @@ interface UserServiceInterface {
     delete: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
 }
 
+container.register<UserRepository>("UserRepository", { useClass: UserDbRepo })
+@injectable()
 export class UserService implements UserServiceInterface{
-    constructor(private readonly model: UserRepository) {}
+    constructor(@inject("UserRepository") private readonly model: UserRepository) {}
 
     async get({ userId }: GetUserDto) : Promise<AppResult<SerializedUserEntity>> {
         const userIdVo = (UUIDVo.fromStr(userId)).unwrap()
@@ -139,6 +139,3 @@ export class UserService implements UserServiceInterface{
         return AppResult.fromResult(result.map((user) => user.serialize()));
     }
 }
-
-const userService: UserServiceInterface = new UserService(new UserDbRepo())
-export {userService, UserServiceInterface}

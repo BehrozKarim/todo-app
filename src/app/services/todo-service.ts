@@ -1,13 +1,13 @@
 import { mailService } from "../../infra/mail-service"
 import { mailData } from "../../utils/utils"
 import { TodoRepository } from "../../domain/todo-repository"
-import { UUIDVo, AppError } from "@carbonteq/hexapp"
+import { UUIDVo, AppError, AppResult } from "@carbonteq/hexapp"
 import { TaskEntity, SerializedTaskEntity } from "../../domain/todo-entity"
 import { TodoDbRepo } from "../../infra/stores/todo-db-repo"
 import { FetchTodoDto, NewTodoDto, UpdateTodoDto, FetchAllUserTodoDto } from "../dto/todo.dto"
-import { AppResult } from "@carbonteq/hexapp"
+import { injectable, inject , container} from "tsyringe"
 
-interface TaskServiceInterface {
+export interface TaskServiceInterface {
     get: (data: FetchTodoDto) => Promise<AppResult<SerializedTaskEntity>>,
     getAllUserTasks: (data: FetchAllUserTodoDto) => Promise<AppResult<SerializedTaskEntity[]>>,
     create: (data: NewTodoDto) => Promise<AppResult<SerializedTaskEntity>>,
@@ -15,8 +15,11 @@ interface TaskServiceInterface {
     update: (data: UpdateTodoDto) => Promise<AppResult<SerializedTaskEntity>>,
 }
 
+container.register<TodoRepository>("TodoRepository", { useClass: TodoDbRepo})
+
+@injectable()
 export class TaskService implements TaskServiceInterface{
-    constructor(private readonly model: TodoRepository) {}
+    constructor(@inject("TodoRepository") private readonly model: TodoRepository) {}
 
     async get(data: FetchTodoDto): Promise<AppResult<SerializedTaskEntity>> {
         const taskIdVo = (UUIDVo.fromStr(data.id)).unwrap()
@@ -92,6 +95,3 @@ export class TaskService implements TaskServiceInterface{
     }
 
 }
-
-const taskService = new TaskService(new TodoDbRepo())
-export { taskService, TaskServiceInterface }
