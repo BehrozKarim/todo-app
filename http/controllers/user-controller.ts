@@ -10,13 +10,13 @@ interface customRequest extends Request {
 }
 
 interface UserControllerInterface {
-    createUser(req: Request, res: Response): Promise<void>
-    login(req: Request, res: Response): Promise<void>
-    logout(req: Request, res: Response): Promise<void>
-    updateUser(req: customRequest, res: Response): Promise<void>
-    deleteUser(req: customRequest, res: Response): Promise<void>
-    getUser(req: customRequest, res: Response): Promise<void>
-    changePassword(req: customRequest, res: Response): Promise<void>
+    createUser: (req: Request, res: Response) => Promise<void>
+    login: (req: Request, res: Response) => Promise<void>
+    logout: (req: Request, res: Response) => Promise<void>
+    updateUser: (req: customRequest, res: Response) => Promise<void>
+    deleteUser: (req: customRequest, res: Response) => Promise<void>
+    getUser: (req: customRequest, res: Response) => Promise<void>
+    changePassword: (req: customRequest, res: Response) => Promise<void>
 }
 
 class UserController implements UserControllerInterface {

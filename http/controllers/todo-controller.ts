@@ -9,11 +9,11 @@ interface customRequest extends Request {
 }
 
 interface TodoControllerInterface {
-    createTask(req: customRequest, res: Response): Promise<void>
-    updateTask(req: customRequest, res: Response): Promise<void>
-    getTask(req: customRequest, res: Response): Promise<void>
-    getAllUserTasks(req: customRequest, res: Response): Promise<void>
-    deleteTask(req: customRequest, res: Response): Promise<void>
+    createTask: (req: customRequest, res: Response) => Promise<void>
+    updateTask: (req: customRequest, res: Response) => Promise<void>
+    getTask: (req: customRequest, res: Response) => Promise<void>
+    getAllUserTasks: (req: customRequest, res: Response) => Promise<void>
+    deleteTask: (req: customRequest, res: Response) => Promise<void>
 }
 
 class TodoController {
