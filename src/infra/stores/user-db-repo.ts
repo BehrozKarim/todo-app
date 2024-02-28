@@ -19,12 +19,6 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(username, "username")
                 return fp.Result.Err(err)
             }
-            const ent = UserEntity.create({
-                name: user.name??undefined,
-                username: user.username,
-                email: user.email,
-                password: user.password??undefined,
-            })
 
             const data = {
                 Id: user.userId,
@@ -35,7 +29,7 @@ export class UserDbRepo extends UserRepository {
                 updatedAt: user.updatedAt,
                 createdAt: user.createdAt
             }
-            ent.fromSerialized(data)
+            const ent = UserEntity.fromSerialized(data)
             return fp.Result.Ok(ent)
         } catch (error) {
             return fp.Result.Err(new UserNotFoundError(username, "username"))
@@ -52,12 +46,6 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(email, "email")
                 return fp.Result.Err(err)
             }
-            const ent = UserEntity.create({
-                name: user.name??undefined,
-                username: user.username,
-                email: user.email,
-                password: user.password??undefined,
-            })
 
             const data = {
                 Id: user.userId,
@@ -68,7 +56,7 @@ export class UserDbRepo extends UserRepository {
                 updatedAt: user.updatedAt,
                 createdAt: user.createdAt
             }
-            ent.fromSerialized(data)
+            const ent = UserEntity.fromSerialized(data)
             return fp.Result.Ok(ent)
         } catch (error) {
             return fp.Result.Err(new UserNotFoundError(email, "email"))
@@ -125,13 +113,6 @@ export class UserDbRepo extends UserRepository {
             const user = await prisma.user.delete({
                 where: { userId: Id.serialize() },
             })
-            
-            const ent = UserEntity.create({
-                name: user.name??undefined,
-                username: user.username,
-                email: user.email,
-                password: user.password??undefined,
-            })
 
             const data = {
                 Id: user.userId,
@@ -142,7 +123,7 @@ export class UserDbRepo extends UserRepository {
                 updatedAt: user.updatedAt,
                 createdAt: user.createdAt
             }
-            ent.fromSerialized(data)
+            const ent = UserEntity.fromSerialized(data)
             return fp.Result.Ok(ent)
         } catch (error) {
             return fp.Result.Err(new UserNotFoundError(Id.serialize(), "id"))
@@ -163,12 +144,6 @@ export class UserDbRepo extends UserRepository {
                 const err = new UserNotFoundError(id.serialize(), "id")
                 return fp.Result.Err(err)
             }
-            const ent = UserEntity.create({
-                name: user.name??undefined,
-                username: user.username,
-                email: user.email,
-                password: user.password??undefined,
-            })
 
             const data = {
                 Id: user.userId,
@@ -179,7 +154,7 @@ export class UserDbRepo extends UserRepository {
                 updatedAt: user.updatedAt,
                 createdAt: user.createdAt
             }
-            ent.fromSerialized(data)
+            const ent = UserEntity.fromSerialized(data)
             return fp.Result.Ok(ent)
         } catch (error) {
             return fp.Result.Err(new UserNotFoundError(id.serialize(), "id"))

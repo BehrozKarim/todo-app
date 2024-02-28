@@ -56,6 +56,16 @@ export class UpdateTodoDto extends BaseDto {
     static create(data: unknown): DtoValidationResult<UpdateTodoDto> {
         return BaseDto.validate<{userId: string, id: string, title?: string, description?: string, completed?: boolean}>(UpdateTodoDto.schema, data).map(({ userId, id, title, description, completed }) => new UpdateTodoDto(userId, id, title, description, completed));
     }
+
+    serialize() {
+        return {
+            userId: this.userId,
+            id: this.id,
+            title: this.title,
+            description: this.description,
+            completed: this.completed,
+        }
+    }
 }
 
 export class FetchAllUserTodoDto extends BaseDto {

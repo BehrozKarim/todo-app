@@ -2,12 +2,10 @@ import * as bcrypt from 'bcrypt'
 import { UserEntity, SerializedUserEntity } from "../../domain/user-entity";
 import { UserRepository } from "../../domain/user-repository";
 import { UserDbRepo } from "../../infra/stores/user-db-repo";
-import { UUIDVo } from "@carbonteq/hexapp";
-import { AppResult } from "@carbonteq/hexapp";
+import { AppResult, AppError, UUIDVo } from "@carbonteq/hexapp";
 import { NewUserDto, UpdateUserDto, UserLoginDto, GetUserDto, UserPasswordResetDto } from "../dto/user.dto";
-import { AppError } from '@carbonteq/hexapp';
-
-interface UserServiceInterface {
+import { injectable, inject, container } from 'tsyringe';
+export interface UserServiceInterface {
     get: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
     create: (data: NewUserDto) => Promise<AppResult<SerializedUserEntity>>,
     login: (data: UserLoginDto) => Promise<AppResult<SerializedUserEntity>>,
@@ -16,8 +14,10 @@ interface UserServiceInterface {
     delete: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
 }
 
+container.register<UserRepository>("UserRepository", { useClass: UserDbRepo })
+@injectable()
 export class UserService implements UserServiceInterface{
-    constructor(private readonly model: UserRepository) {}
+    constructor(@inject("UserRepository") private readonly model: UserRepository) {}
 
     async get({ userId }: GetUserDto) : Promise<AppResult<SerializedUserEntity>> {
         const userIdVo = (UUIDVo.fromStr(userId)).unwrap()
@@ -87,20 +87,15 @@ export class UserService implements UserServiceInterface{
                 return AppResult.Err(AppError.InvalidData("Username already exists"))
             }
         }
-
-        const newUserData = {
-            ...user.unwrap().serialize(),
-            name: data.name? data.name: user.unwrap().name,
-            username: data.username? data.username: user.unwrap().username,
-            email: data.email? data.email: user.unwrap().email,
-            updatedAt: new Date()
+        const userEnt = user.unwrap()
+        const newData = {
+            name: data.name || userEnt.name,
+            username: data.username || userEnt.username,
+            email: data.email || userEnt.email,
         }
-        let updatedUser = UserEntity.create({
-            username: newUserData.username,
-            email: newUserData.email
-        })
-        updatedUser.fromSerialized(newUserData)
-        const result = await this.model.update(updatedUser)
+
+        userEnt.update(newData)
+        const result = await this.model.update(userEnt)
         if (result.isErr()) {
             return AppResult.Err(result.unwrapErr())
         }
@@ -122,19 +117,9 @@ export class UserService implements UserServiceInterface{
             return AppResult.Err(AppError.InvalidData("Invalid Credentials"))
         }
         const passwordHash = await bcrypt.hash(data.newPassword, 10)
-        let updatedUser = UserEntity.create({
-            username: currentDetails.username,
-            email: currentDetails.email
-        })
+        currentDetails.password = passwordHash
 
-        let serializedUser = {
-            ...currentDetails.serialize(),
-            password: passwordHash,
-            updatedAt: new Date()
-        }
-
-        updatedUser.fromSerialized(serializedUser)
-        const result = await this.model.update(updatedUser)
+        const result = await this.model.update(currentDetails)
         if (result.isErr()) {
             return AppResult.Err(result.unwrapErr())
         }
@@ -154,6 +139,3 @@ export class UserService implements UserServiceInterface{
         return AppResult.fromResult(result.map((user) => user.serialize()));
     }
 }
-
-const userService: UserServiceInterface = new UserService(new UserDbRepo())
-export {userService, UserServiceInterface}

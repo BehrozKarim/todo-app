@@ -21,11 +21,6 @@ export class TodoDbRepo extends TodoRepository {
                 return fp.Result.Err(new TaskNotFoundError(id.serialize()))
             }
 
-            const ent = TaskEntity.create({
-                title: task.title,
-                description: task.description,
-                userId: task.userId,
-            })
             const data = {
                 Id: task.id,
                 title: task.title,
@@ -35,7 +30,7 @@ export class TodoDbRepo extends TodoRepository {
                 updatedAt: task.updatedAt,
                 createdAt: task.createdAt
             }
-            ent.fromSerialized(data)
+            const ent = TaskEntity.fromSerialized(data)
             return fp.Result.Ok(ent)
         } catch (error) {
             return fp.Result.Err(new TaskNotFoundError(id.serialize()))
@@ -70,11 +65,6 @@ export class TodoDbRepo extends TodoRepository {
                 return fp.Result.Err(new TaskNotFoundError(Id.serialize()))
             }
 
-            const ent = TaskEntity.create({
-                title: task.title,
-                description: task.description,
-                userId: task.userId,
-            })
             const data = {
                 Id: task.id,
                 title: task.title,
@@ -84,7 +74,7 @@ export class TodoDbRepo extends TodoRepository {
                 updatedAt: task.updatedAt,
                 createdAt: task.createdAt
             }
-            ent.fromSerialized(data)
+            const ent = TaskEntity.fromSerialized(data)
             return fp.Result.Ok(ent)
         } catch (error) {
             return fp.Result.Err(new TaskNotFoundError(Id.serialize()))
@@ -113,12 +103,7 @@ export class TodoDbRepo extends TodoRepository {
                     updatedAt: task.updatedAt,
                     createdAt: task.createdAt
                 }
-                const ent = TaskEntity.create({
-                    title: task.title,
-                    description: task.description,
-                    userId: task.userId,
-                })
-                ent.fromSerialized(data)
+                const ent = TaskEntity.fromSerialized(data)
                 return ent
             })
 
@@ -142,12 +127,6 @@ export class TodoDbRepo extends TodoRepository {
             if (!task) {
                 return fp.Result.Err(new TaskNotFoundError(entity.Id.serialize()))
             }
-
-            const ent = TaskEntity.create({
-                title: task.title,
-                description: task.description,
-                userId: task.userId,
-            })
             const data = {
                 Id: task.id,
                 title: task.title,
@@ -157,7 +136,7 @@ export class TodoDbRepo extends TodoRepository {
                 updatedAt: task.updatedAt,
                 createdAt: task.createdAt
             }
-            ent.fromSerialized(data)
+            const ent = TaskEntity.fromSerialized(data)
             return fp.Result.Ok(ent)
 
         } catch (error) {

@@ -83,9 +83,9 @@ describe('User Entity', () => {
             const updatedAt = uEntity.updatedAt;
             setTimeout(() => {}, 100);
 
-            uEntity.fromSerialized(serialized);
-            expect(uEntity.updatedAt).to.not.equal(updatedAt);
-            expect(uEntity.updatedAt).to.not.equal(uEntity.createdAt);
+            const ent = UserEntity.fromSerialized(serialized);
+            expect(ent.updatedAt).to.not.equal(updatedAt);
+            expect(ent.updatedAt).to.not.equal(ent.createdAt);
         });
     });
 });

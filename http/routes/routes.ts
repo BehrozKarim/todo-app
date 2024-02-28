@@ -15,51 +15,49 @@ router.get("/", (req, res) => {
 })
 
 // User APIs
-router.post("/signup", userController.createUser.bind(userController))
+router.post("/signup", userController.createUser)
 
-router.post("/login", userController.login.bind(userController))
+router.post("/login", userController.login)
 
-router.post("/change-password", isAuthenticated, userController.changePassword.bind(userController))
+router.post("/change-password", isAuthenticated, userController.changePassword)
 
-router.get("/logout", isAuthenticated, userController.logout.bind(userController))
+router.get("/logout", isAuthenticated, userController.logout)
 
 router.route("/user")
     .get(
-        isAuthenticated, userController.getUser.bind(userController)
+        isAuthenticated, userController.getUser
     )
     .put(
         isAuthenticated,
-        userController.updateUser.bind(userController)
+        userController.updateUser
     )
     .delete(
-        isAuthenticated, userController.deleteUser.bind(userController)
+        isAuthenticated, userController.deleteUser
     )
-
-
 
 // TODO List APIs
 router.route("/todo")
     .post(
         isAuthenticated,
-        todoController.createTask.bind(todoController)
+        todoController.createTask
     )
     .get(
         isAuthenticated,
-        todoController.getAllUserTasks.bind(todoController)
+        todoController.getAllUserTasks
     )
 
 router.route("/todo/:id")
     .get(
         isAuthenticated, 
-        todoController.getTask.bind(todoController)
+        todoController.getTask
     )
     .put(
         isAuthenticated,
-        todoController.updateTask.bind(todoController)
+        todoController.updateTask
     )
     .delete(
         isAuthenticated,
-        todoController.deleteTask.bind(todoController)
+        todoController.deleteTask
     )
 
 export default router

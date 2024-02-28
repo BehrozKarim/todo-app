@@ -80,9 +80,9 @@ describe('Task Entity', () => {
             let serialized = tEntity.serialize();
             setTimeout(() => {}, 100);
             serialized.updatedAt = new Date()
-            tEntity.fromSerialized(serialized);
-            expect(tEntity.updatedAt).to.not.equal(updatedAt);
-            expect(tEntity.updatedAt).to.not.equal(tEntity.createdAt);
+            const ent = TaskEntity.fromSerialized(serialized)
+            expect(ent.updatedAt).to.not.equal(updatedAt);
+            expect(ent.updatedAt).to.not.equal(ent.createdAt);
         })
     });
 });
