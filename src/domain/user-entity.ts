@@ -61,10 +61,8 @@ export class UserEntity extends BaseEntity implements IUser{
         return new UserEntity(data.username, data.email, data.password, data.name)
     }
 
-    update(data : userSignUpData) {
-        this._name = data.name
-        this._username = data.username
-        this._email = data.email
+    update(data: Partial<IUser>): void {
+        Object.assign(this, data)
         super.markUpdated()
     }
 

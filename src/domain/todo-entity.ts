@@ -17,6 +17,12 @@ export interface SerializedTaskEntity extends SerializedEntity {
     updatedAt: DateTime
 }
 
+type TaskCreationData = {
+    title: string,
+    description: string,
+    userId: string,
+}
+
 export class TaskEntity extends BaseEntity implements ITask{
     private _title: string
     private _description: string
@@ -51,10 +57,8 @@ export class TaskEntity extends BaseEntity implements ITask{
         return new TaskEntity(data.title, data.description, false, data.userId)
     }
 
-    update(data: updateData): void {
-        this._title = data.title ?? this.title
-        this._description = data.description ?? this.description
-        this._completed = data.completed ?? this.completed
+    update(data: Partial<ITask>): void {
+        Object.assign(this, data)
         super.markUpdated()
     }
 
@@ -79,44 +83,3 @@ export class TaskEntity extends BaseEntity implements ITask{
         }
     }
 }
-
-
-
-
-type TaskCreationData = {
-    title: string,
-    description: string,
-    userId: string,
-}
-
-type updateData = {
-    id: string,
-    title?: string,
-    description?: string,
-    completed?: boolean,
-}
-
-type TaskData = {
-    id: string,
-    title: string,
-    description: string,
-    completed: boolean,
-    userId: string,
-    createdAt: Date,
-    updatedAt: Date,
-}
-
-type storeResult <T, E = TaskInvalidOperationError> = Result<
-    T,
-    E | TaskInvalidOperationError
->
-
-interface Task {
-    create: (data: TaskCreationData) => Promise<storeResult<TaskData, TaskAlreadyExistsError>>,
-    get: (id: string) => Promise<storeResult<TaskData, TaskNotFoundError>>,
-    update: (data: updateData) => Promise<storeResult<TaskData, TaskNotFoundError>>,
-    delete: (id: string) => Promise<storeResult<TaskData, TaskNotFoundError>>,
-    getAllUserTasks: (userId: string, page: number) => Promise<storeResult<TaskData[], TaskNotFoundError>>,
-}
-
-export {Task, TaskData, TaskCreationData, updateData, storeResult}

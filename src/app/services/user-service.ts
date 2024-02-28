@@ -88,13 +88,7 @@ export class UserService implements UserServiceInterface{
             }
         }
         const userEnt = user.unwrap()
-        const newData = {
-            name: data.name || userEnt.name,
-            username: data.username || userEnt.username,
-            email: data.email || userEnt.email,
-        }
-
-        userEnt.update(newData)
+        userEnt.update(data)
         const result = await this.model.update(userEnt)
         if (result.isErr()) {
             return AppResult.Err(result.unwrapErr())
