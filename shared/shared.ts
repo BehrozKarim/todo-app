@@ -1,7 +1,7 @@
 import * as jwt from 'jsonwebtoken'
-import { SerializedUserEntity } from '../domain/user-entity'
+import { SerializedUserEntity } from '../src/domain/user-entity'
 import { AppResult, AppErrStatus, AppError } from '@carbonteq/hexapp'
-import logger from '../infra/logger'
+import logger from '../src/infra/logger'
 
 type User = {
     userId: string,

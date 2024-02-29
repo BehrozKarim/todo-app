@@ -1,5 +1,5 @@
 import { mailService } from "../../infra/mail-service"
-import { mailData } from "../../utils/utils"
+import { mailData } from "../../../shared/shared"
 import { TodoRepository } from "../../domain/todo-repository"
 import { UUIDVo, AppError, AppResult } from "@carbonteq/hexapp"
 import { TaskEntity, SerializedTaskEntity } from "../../domain/todo-entity"

@@ -1,9 +1,9 @@
 import { Request, Response } from 'express'
 import {UserService, UserServiceInterface } from '../../src/app/services/user-service'
 import { GetUserDto, NewUserDto, UpdateUserDto, UserLoginDto, UserPasswordResetDto } from '../../src/app/dto/user.dto'
-import { cleanLoginData, cleanUserData } from '../../src/utils/utils'
+import { cleanLoginData, cleanUserData } from '../../shared/shared'
 import { inject, injectable, container } from 'tsyringe'
-import { HttpResponse } from '../../src/utils/utils'
+import { HttpResponse } from '../../shared/shared'
 
 interface customRequest extends Request {
     userId?: string

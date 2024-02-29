@@ -2,7 +2,7 @@ import { Request, Response } from 'express'
 import { TaskService, TaskServiceInterface } from '../../src/app/services/todo-service'
 import { FetchTodoDto, FetchAllUserTodoDto, NewTodoDto, UpdateTodoDto } from '../../src/app/dto/todo.dto'
 import { injectable, inject, container } from 'tsyringe'
-import { HttpResponse } from '../../src/utils/utils'
+import { HttpResponse } from '../../shared/shared'
 
 interface customRequest extends Request {
     userId?: string

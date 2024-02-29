@@ -2,7 +2,7 @@ import {google} from 'googleapis';
 import { UserDbRepo } from './stores/user-db-repo';
 import { UserRepository } from '../domain/user-repository';
 import { UserEntity } from '../domain/user-entity';
-import { createToken } from '../utils/utils';
+import { createToken } from '../../shared/shared';
 import logger from './logger';
 
 const oAuth2Client = new google.auth.OAuth2(

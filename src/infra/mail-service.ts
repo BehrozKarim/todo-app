@@ -3,7 +3,7 @@ import * as dotenv from 'dotenv';
 import logger from './logger';
 import { UUIDVo } from '@carbonteq/hexapp';
 import { UserDbRepo } from './stores/user-db-repo';
-import { mailData } from '../utils/utils';
+import { mailData } from '../../shared/shared';
 dotenv.config();
 
 const apiKey = process.env.SENDGRID_API_KEY??'';
