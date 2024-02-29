@@ -53,6 +53,18 @@ export class UserEntity extends BaseEntity implements IUser{
         return this._password
     }
 
+    set name(name: string | undefined) {
+        this._name = name
+    }
+
+    set username(username: string) {
+        this._username = username
+    }
+
+    set email(email: string) {
+        this._email = email
+    }
+
     set password(password: string | undefined) {
         this._password = password
     }

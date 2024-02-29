@@ -1,12 +1,15 @@
 import { expect } from "chai";
-import { userService } from "../../src/app/services/user-service";
+import { UserService } from "../../src/app/services/user-service";
 import prisma from "../../client/prisma-client";
 import sinon from "sinon";
 import { AppResult } from "@carbonteq/hexapp";
 import * as userDtos from "../../src/app/dto/user.dto";
 import { Result } from "@carbonteq/fp";
 import * as bcrypt from "bcrypt";
+import { container } from "tsyringe";
+import logger from "../../src/infra/logger";
 
+const userService = container.resolve(UserService);
 describe('UserService', () => {
     afterEach(async () => {
         sinon.reset();
@@ -88,7 +91,7 @@ describe('UserService', () => {
                 createdAt: new Date()
             }
             prisma.user.findUnique = sinon.stub().resolves(data);
-            prisma.user.update = sinon.stub().resolves(data);
+            prisma.user.update = sinon.stub().resolves({ ...data, updatedAt: new Date() });
             const result = await userService.update(userUpdateDto.unwrap());
             const userEnt = result.unwrap()
             expect(userEnt.name).to.equal(data.name);
@@ -173,7 +176,7 @@ describe('UserService', () => {
                 createdAt: new Date()
             }
             prisma.user.findUnique = sinon.stub().resolves(data);
-            prisma.user.update = sinon.stub().resolves(data);
+            prisma.user.update = sinon.stub().resolves({ ...data, updatedAt: new Date()});
             const result = await userService.changePassword(userPasswordResetDto.unwrap());
             const userEnt = result.unwrap()
             expect(userEnt.name).to.equal(data.name);

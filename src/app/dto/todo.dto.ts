@@ -59,8 +59,6 @@ export class UpdateTodoDto extends BaseDto {
 
     serialize() {
         return {
-            userId: this.userId,
-            id: this.id,
             title: this.title,
             description: this.description,
             completed: this.completed,
