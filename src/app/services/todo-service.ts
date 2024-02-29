@@ -6,6 +6,7 @@ import { TaskEntity, SerializedTaskEntity } from "../../domain/todo-entity"
 import { TodoDbRepo } from "../../infra/stores/todo-db-repo"
 import { FetchTodoDto, NewTodoDto, UpdateTodoDto, FetchAllUserTodoDto } from "../dto/todo.dto"
 import { injectable, inject , container} from "tsyringe"
+import { matchRes, Result } from "@carbonteq/fp"
 
 export interface TaskServiceInterface {
     get: (data: FetchTodoDto) => Promise<AppResult<SerializedTaskEntity>>,
@@ -37,10 +38,10 @@ export class TaskService implements TaskServiceInterface{
     async create(data: NewTodoDto): Promise<AppResult<SerializedTaskEntity>> {
         const task = TaskEntity.create(data.serialize())
         const result = await this.model.insert(task)
-        if (result.isErr()) {
-            return AppResult.Err(result.unwrapErr())
-        }
-        return AppResult.fromResult(result.map((task) => task.serialize()));
+        return matchRes(result, {
+            Ok: (task) => AppResult.fromResult(Result.Ok(task.serialize())),
+            Err: (err) => AppResult.Err(err)
+        })
     }
 
     async update(data: UpdateTodoDto): Promise<AppResult<SerializedTaskEntity>> {
@@ -55,10 +56,10 @@ export class TaskService implements TaskServiceInterface{
         const task = currentTask.unwrap()
         task.update(data.serialize())
         const result = await this.model.update(task)
-        if (result.isErr()) {
-            return AppResult.Err(result.unwrapErr())
-        }
-        return AppResult.fromResult(result.map((task) => task.serialize()));
+        return matchRes(result, {
+            Ok: (task) => AppResult.fromResult(Result.Ok(task.serialize())),
+            Err: (err) => AppResult.Err(err)
+        })
     }
 
     async delete(data: FetchTodoDto): Promise<AppResult<SerializedTaskEntity>> {
@@ -85,13 +86,10 @@ export class TaskService implements TaskServiceInterface{
 
     async getAllUserTasks(data: FetchAllUserTodoDto): Promise<AppResult<SerializedTaskEntity[]>> {
         const tasks = await this.model.fetchByUserId(data.userId, data.page??1)
-        if (tasks.isErr()) {
-            return AppResult.Err(tasks.unwrapErr())
-        }
-        const unwrappedTasks = tasks.unwrap()
-        const res = unwrappedTasks.map((task) => task.serialize());
-
-        return AppResult.Ok(res);
+        return matchRes(tasks, {
+            Ok: (tasks) => AppResult.fromResult(Result.Ok(tasks.map((task) => task.serialize()))),
+            Err: (err) => AppResult.Err(err)
+        })
     }
 
 }

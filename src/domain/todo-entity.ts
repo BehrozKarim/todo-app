@@ -53,6 +53,18 @@ export class TaskEntity extends BaseEntity implements ITask{
         return this._userId
     }
 
+    set title(title: string) {
+        this._title = title
+    }
+
+    set description(description: string) {
+        this._description = description
+    }
+
+    set completed(completed: boolean) {
+        this._completed = completed
+    }
+
     static create(data: TaskCreationData): TaskEntity {
         return new TaskEntity(data.title, data.description, false, data.userId)
     }

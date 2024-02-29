@@ -1,5 +1,7 @@
 import * as jwt from 'jsonwebtoken'
 import { SerializedUserEntity } from '../domain/user-entity'
+import { AppResult, AppErrStatus, AppError } from '@carbonteq/hexapp'
+import logger from '../infra/logger'
 
 type User = {
     userId: string,
@@ -20,7 +22,10 @@ async function createToken(user: User) {
     return token
 }
 
-export async function cleanLoginData(data: SerializedUserEntity){
+export async function cleanLoginData(data: SerializedUserEntity | string){
+    if (typeof data === 'string') {
+        return data
+    }
     const token = await createToken({userId: data.Id})
     const user = {
         token: token,
@@ -34,7 +39,10 @@ export async function cleanLoginData(data: SerializedUserEntity){
     return user
 }
 
-export async function cleanUserData(data: SerializedUserEntity){
+export async function cleanUserData(data: SerializedUserEntity | string){
+    if (typeof data === 'string') {
+        return data
+    }
     return {
         userId: data.Id,
         name: data.name,
@@ -42,6 +50,54 @@ export async function cleanUserData(data: SerializedUserEntity){
         email: data.email,
         updatedAt: data.updatedAt,
         createdAt: data.createdAt,
+    }
+}
+
+// declare an enum to map stauts codes to AppErrStatus
+enum ErrStatusCode {
+    "NotFound" = 404,
+    "Unauthorized" = 401,
+    "InvalidData" = 400,
+    "InvalidOperation" = 400,
+    "AlreadyExists" = 409,
+    "ExternalServiceFailure" = 500,
+    "Generic" = 500,
+}
+
+export interface HttpResponseData {
+    status: number,
+    data: any,
+}
+
+export class HttpResponse {
+    
+    static fromAppResult<T>(result: AppResult<T>) {
+        if (result.isErr()) {
+            return {
+                status: ErrStatusCode[result.unwrapErr().status],
+                data: result.unwrapErr().message,
+            
+            }
+        }
+        return {
+            status: 200,
+            data: result.unwrap(),
+        }
+    }
+
+    static fromAppError<T>(error: AppError) {
+        logger.error(error.message)
+        return {
+            status: ErrStatusCode[error.status],
+            data: error.message,
+        }
+    }
+
+    static fromData<T>(data: T) {
+        return {
+            status: 200,
+            data: data,
+        }
     }
 }
 

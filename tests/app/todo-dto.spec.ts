@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import { expect } from "chai";
 import * as todoDto from "../../src/app/dto/todo.dto";
 describe("When todo dto input is ", () => {

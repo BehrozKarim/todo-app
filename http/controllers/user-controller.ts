@@ -1,10 +1,9 @@
-import * as dotenv from 'dotenv'
 import { Request, Response } from 'express'
 import {UserService, UserServiceInterface } from '../../src/app/services/user-service'
 import { GetUserDto, NewUserDto, UpdateUserDto, UserLoginDto, UserPasswordResetDto } from '../../src/app/dto/user.dto'
 import { cleanLoginData, cleanUserData } from '../../src/utils/utils'
 import { inject, injectable, container } from 'tsyringe'
-dotenv.config()
+import { HttpResponse } from '../../src/utils/utils'
 
 interface customRequest extends Request {
     userId?: string
@@ -33,13 +32,8 @@ class UserController implements UserControllerInterface {
         }
 
         const result = await this.service.create(dto.unwrap())
-        if (result.isErr()) {
-            res.status(500).json(result.unwrapErr())
-            return
-        }
-        const response = result.unwrap()
-        const data = await cleanLoginData(response)
-        res.status(200).json(data)
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(await cleanUserData(response.data))
     }
 
     login = async (req: Request, res: Response) => {
@@ -49,12 +43,8 @@ class UserController implements UserControllerInterface {
             return
         }
         const result = await this.service.login(dto.unwrap())
-        if (result.isErr()) {
-            res.status(500).json(result.unwrapErr())
-            return
-        }
-        const response = result.unwrap()
-        res.status(200).json(await cleanLoginData(response))
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(await cleanLoginData(response.data))
     }
 
     logout = async (req: Request, res: Response) => {
@@ -70,12 +60,9 @@ class UserController implements UserControllerInterface {
                 return
             }
             const result = await this.service.update(dto.unwrap())
-            if (result.isErr()) {
-                res.status(500).json(result.unwrapErr())
-                return
-            }
-            const response = result.unwrap()
-            res.status(200).json(await cleanUserData(response))
+            const response = HttpResponse.fromAppResult(result)
+            res.status(response.status).json(await cleanUserData(response.data))
+
         }
         else {
             res.status(400).json("Invalid Request")
@@ -90,12 +77,9 @@ class UserController implements UserControllerInterface {
                 return
             }
             const result = await this.service.delete(dto.unwrap())
-            if (result.isErr()) {
-                res.status(500).json(result.unwrapErr())
-                return
-            }
-            const response = result.unwrap()
-            res.status(200).json(response)
+            const response = HttpResponse.fromAppResult(result)
+            res.status(response.status).json(await cleanUserData(response.data))
+
         }
         else {
             res.status(400).json("Invalid Request")
@@ -110,12 +94,9 @@ class UserController implements UserControllerInterface {
                 return
             }
             const result = await this.service.get(dto.unwrap())
-            if (result.isErr()) {
-                res.status(500).json(result.unwrapErr())
-                return
-            }
-            const response = result.unwrap()
-            res.status(200).json(await cleanUserData(response))
+            const response = HttpResponse.fromAppResult(result)
+            res.status(response.status).json(await cleanUserData(response.data))
+
         }
         else {
             res.status(400).json("Invalid Request")
@@ -130,12 +111,9 @@ class UserController implements UserControllerInterface {
                 return
             }
             const result = await this.service.changePassword(dto.unwrap())
-            if (result.isErr()) {
-                res.status(500).json(result.unwrapErr())
-                return
-            }
-            const response = result.unwrap()
-            res.status(200).json(await cleanUserData(response))
+            const response = HttpResponse.fromAppResult(result)
+            res.status(response.status).json(await cleanUserData(response.data))
+
         }
         else {
             res.status(400).json("Invalid Request")

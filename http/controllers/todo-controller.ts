@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { TaskService, TaskServiceInterface } from '../../src/app/services/todo-service'
 import { FetchTodoDto, FetchAllUserTodoDto, NewTodoDto, UpdateTodoDto } from '../../src/app/dto/todo.dto'
 import { injectable, inject, container } from 'tsyringe'
+import { HttpResponse } from '../../src/utils/utils'
 
 interface customRequest extends Request {
     userId?: string
@@ -28,12 +29,9 @@ class TodoController {
                 return
             }
             const result = await this.service.create(dto.unwrap())
-            if (result.isErr()) {
-                res.status(500).json(result.unwrapErr())
-                return
-            }
-            const response = result.unwrap()
-            res.status(200).json(response)
+            const response = HttpResponse.fromAppResult(result)
+            res.status(response.status).json(response.data)
+
         }
         else {
             res.status(400).json("Invalid Request")
@@ -48,12 +46,9 @@ class TodoController {
                 return
             }
             const result = await this.service.get(dto.unwrap())
-            if (result.isErr()) {
-                res.status(500).json(result.unwrapErr())
-                return
-            }
-            const response = result.unwrap()
-            res.status(200).json(response)
+            const response = HttpResponse.fromAppResult(result)
+            res.status(response.status).json(response.data)
+
         }
         else {
             res.status(400).json("Invalid Request")
@@ -71,12 +66,9 @@ class TodoController {
             return
         }
         const result = await this.service.update(dto.unwrap())
-        if (result.isErr()) {
-            res.status(500).json(result.unwrapErr())
-            return
-        }
-        const response = result.unwrap()
-        res.status(200).json(response)
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(response.data)
+
     }
 
     getAllUserTasks = async (req: customRequest, res: Response) => {
@@ -87,12 +79,9 @@ class TodoController {
                 return
             }
             const result = await this.service.getAllUserTasks(dto.unwrap())
-            if (result.isErr()) {
-                res.status(500).json(result.unwrapErr())
-                return
-            }
-            const response = result.unwrap()
-            res.json(response)
+            const response = HttpResponse.fromAppResult(result)
+            res.status(response.status).json(response.data)
+
         }
     }
 
@@ -104,12 +93,9 @@ class TodoController {
                 return
             }
             const result = await this.service.delete(dto.unwrap())
-            if (result.isErr()) {
-                res.status(500).json(result.unwrapErr())
-                return
-            }
-            const response = result.unwrap()
-            res.status(200).json(response)
+            const response = HttpResponse.fromAppResult(result)
+            res.status(response.status).json(response.data)
+
         }
         else {
             res.status(400).json("Invalid Request")

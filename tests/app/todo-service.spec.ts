@@ -1,12 +1,13 @@
 import { expect } from "chai";
-import { taskService } from "../../src/app/services/todo-service"
+import { TaskService } from "../../src/app/services/todo-service"
 import prisma from "../../client/prisma-client";
 import sinon from "sinon";
 import { AppResult } from "@carbonteq/hexapp";
 import * as taskDtos from "../../src/app/dto/todo.dto";
 import { Result } from "@carbonteq/fp";
 import  {mailService} from "../../src/infra/mail-service";
-
+import { container } from "tsyringe";
+const taskService  = container.resolve(TaskService);
 describe('TaskService', () => {
     afterEach(async () => {
         sinon.reset();
@@ -88,7 +89,7 @@ describe('TaskService', () => {
                 createdAt: new Date()
             }
             prisma.todo.findUnique = sinon.stub().resolves(data);
-            prisma.todo.update = sinon.stub().resolves(data);
+            prisma.todo.update = sinon.stub().resolves({...data, updatedAt: new Date()});
             const taskDto = taskDtos.UpdateTodoDto.create(task);
             const result = await taskService.update(taskDto.unwrap());
             let newData = {
@@ -96,7 +97,15 @@ describe('TaskService', () => {
                 Id: data.id
             }
             delete (newData as any).id;
-            expect(result).to.deep.equal(AppResult.fromResult(Result.Ok(newData)));
+            const taskEntity = result.unwrap();
+            expect(taskEntity.userId).to.equal(newData.userId);
+            expect(taskEntity.title).to.equal(newData.title);
+            expect(taskEntity.description).to.equal(newData.description);
+            expect(taskEntity.completed).to.equal(newData.completed);
+            expect(taskEntity.updatedAt).to.not.equal(data.updatedAt);
+            expect(taskEntity.Id).to.equal(data.id);
+            expect(taskEntity.createdAt).to.equal(data.createdAt);
+            expect(taskEntity.updatedAt).to.not.equal(data.createdAt);
         });
     });
 
