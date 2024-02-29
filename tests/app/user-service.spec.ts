@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { UserService } from "../../src/app/services/user-service";
-import prisma from "../../client/prisma-client";
+import prisma from "../../src/infra/client/prisma-client";
 import sinon from "sinon";
 import { AppResult } from "@carbonteq/hexapp";
 import * as userDtos from "../../src/app/dto/user.dto";

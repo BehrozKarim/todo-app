@@ -1,8 +1,8 @@
 import express from "express"
-import userController from "../controllers/user-controller"
 import {isAuthenticated} from "../middlewares/auth-middleware"
 import { googleAuth, googleAuthCallback } from "../controllers/google-auth-controller"
-import todoController from "../controllers/todo-controller"
+import { userController, todoController } from "../../src/infra/di-container"
+import asyncHandler from "express-async-handler";
 const router = express.Router()
 
 // Google Auth APIs
@@ -15,49 +15,49 @@ router.get("/", (req, res) => {
 })
 
 // User APIs
-router.post("/signup", userController.createUser)
+router.post("/signup", asyncHandler(userController.createUser))
 
-router.post("/login", userController.login)
+router.post("/login", asyncHandler(userController.login))
 
-router.post("/change-password", isAuthenticated, userController.changePassword)
+router.post("/change-password", isAuthenticated, asyncHandler(userController.changePassword))
 
-router.get("/logout", isAuthenticated, userController.logout)
+router.get("/logout", isAuthenticated, asyncHandler(userController.logout))
 
 router.route("/user")
     .get(
-        isAuthenticated, userController.getUser
+        isAuthenticated, asyncHandler(userController.getUser)
     )
     .put(
         isAuthenticated,
-        userController.updateUser
+        asyncHandler(userController.updateUser)
     )
     .delete(
-        isAuthenticated, userController.deleteUser
+        isAuthenticated, asyncHandler(userController.deleteUser)
     )
 
 // TODO List APIs
 router.route("/todo")
     .post(
         isAuthenticated,
-        todoController.createTask
+        asyncHandler(todoController.createTask)
     )
     .get(
         isAuthenticated,
-        todoController.getAllUserTasks
+        asyncHandler(todoController.getAllUserTasks)
     )
 
 router.route("/todo/:id")
     .get(
         isAuthenticated, 
-        todoController.getTask
+        asyncHandler(todoController.getTask)
     )
     .put(
         isAuthenticated,
-        todoController.updateTask
+        asyncHandler(todoController.updateTask)
     )
     .delete(
         isAuthenticated,
-        todoController.deleteTask
+        asyncHandler(todoController.deleteTask)
     )
 
 export default router

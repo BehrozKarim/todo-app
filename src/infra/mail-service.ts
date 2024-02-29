@@ -2,11 +2,13 @@ import sgMail from '@sendgrid/mail';
 import * as dotenv from 'dotenv';
 import logger from './logger';
 import { UUIDVo } from '@carbonteq/hexapp';
-import { UserDbRepo } from './stores/user-db-repo';
+import { UserDbRepo } from './Repos/user-db-repo';
 import { mailData } from '../../shared/shared';
+import {config} from './config/config';
 dotenv.config();
 
-const apiKey = process.env.SENDGRID_API_KEY??'';
+// const apiKey = process.env.SENDGRID_API_KEY??'';
+const apiKey = config.sendgridApiKey;
 sgMail.setApiKey(apiKey);
 
 export const mailService = {
@@ -25,7 +27,8 @@ export const mailService = {
         const userData = user.unwrap();
         const sendMailData = {
             to: userData.email,
-            from: process.env.SENDGRID_EMAIL??'',
+            // from: process.env.SENDGRID_EMAIL??'',
+            from: config.sendgridEmail,
             subject: mail.subject,
             text: mail.data,
         }

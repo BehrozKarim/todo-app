@@ -1,6 +1,6 @@
 import { expect } from "chai";
 import { TaskService } from "../../src/app/services/todo-service"
-import prisma from "../../client/prisma-client";
+import prisma from "../../src/infra/client/prisma-client";
 import sinon from "sinon";
 import { AppResult } from "@carbonteq/hexapp";
 import * as taskDtos from "../../src/app/dto/todo.dto";

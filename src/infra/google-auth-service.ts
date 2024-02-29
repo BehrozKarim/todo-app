@@ -1,14 +1,21 @@
 import {google} from 'googleapis';
-import { UserDbRepo } from './stores/user-db-repo';
+import { UserDbRepo } from './Repos/user-db-repo';
 import { UserRepository } from '../domain/user-repository';
 import { UserEntity } from '../domain/user-entity';
 import { createToken } from '../../shared/shared';
 import logger from './logger';
+import { config } from "./config/config"
+
+// const oAuth2Client = new google.auth.OAuth2(
+//     process.env.GOOGLE_CLIENT_ID,
+//     process.env.GOOGLE_CLIENT_SECRET,
+//     process.env.GOOGLE_REDIRECT_URL
+// );
 
 const oAuth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URL
+    config.googleClientId,
+    config.googleClientSecret,
+    config.googleRedirectUrl
 );
 
 export const googleAuthCallbackService = async (code: string) => {

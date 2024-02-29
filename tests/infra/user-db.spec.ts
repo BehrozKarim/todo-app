@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { UserDbRepo } from '../../src/infra/stores/user-db-repo';
+import { UserDbRepo } from '../../src/infra/Repos/user-db-repo';
 import { UserEntity } from '../../src/domain/user-entity';
 import { Result } from "@carbonteq/fp";
-import prisma from '../../client/prisma-client';
+import prisma from '../../src/infra/client/prisma-client';
 
 
 const db = new UserDbRepo();

@@ -1,7 +1,7 @@
 import * as bcrypt from 'bcrypt'
 import { UserEntity, SerializedUserEntity } from "../../domain/user-entity";
 import { UserRepository } from "../../domain/user-repository";
-import { UserDbRepo } from "../../infra/stores/user-db-repo";
+import { UserDbRepo } from "../../infra/Repos/user-db-repo";
 import { AppResult, AppError, UUIDVo } from "@carbonteq/hexapp";
 import { NewUserDto, UpdateUserDto, UserLoginDto, GetUserDto, UserPasswordResetDto } from "../dto/user.dto";
 import { injectable, inject, container } from 'tsyringe';
@@ -15,14 +15,13 @@ export interface UserServiceInterface {
     delete: (data: GetUserDto) => Promise<AppResult<SerializedUserEntity>>,
 }
 
-container.register<UserRepository>("UserRepository", { useClass: UserDbRepo })
 @injectable()
 export class UserService implements UserServiceInterface{
-    constructor(@inject("UserRepository") private readonly model: UserRepository) {}
+    constructor(@inject("UserRepository") private readonly repo: UserRepository) {}
 
     async get({ userId }: GetUserDto) : Promise<AppResult<SerializedUserEntity>> {
         const userIdVo = (UUIDVo.fromStr(userId)).unwrap()
-        const user = await this.model.fetchById(userIdVo)
+        const user = await this.repo.fetchById(userIdVo)
         return matchRes(user, {
             Ok: (user) => AppResult.fromResult(Result.Ok(user.serialize())),
             Err: (err) => AppResult.Err(err)
@@ -37,7 +36,7 @@ export class UserService implements UserServiceInterface{
             ...data.serialize(),
             password: passwordHash
         })
-        const result = await this.model.insert(user)
+        const result = await this.repo.insert(user)
         return matchRes(result, {
             Ok: (user) => AppResult.fromResult(Result.Ok(user.serialize())),
             Err: (err) => AppResult.Err(err)
@@ -47,9 +46,9 @@ export class UserService implements UserServiceInterface{
     async login(data: UserLoginDto): Promise<AppResult<SerializedUserEntity>> {
         let user;
         if (data.username)
-            user = await this.model.fetchByUsername(data.username)
+            user = await this.repo.fetchByUsername(data.username)
         else if (data.email)
-            user = await this.model.fetchByEmail(data.email)
+            user = await this.repo.fetchByEmail(data.email)
         else
             return AppResult.Err(AppError.InvalidData("Invalid Username or Email"))
         if (user.isErr()) {
@@ -69,27 +68,27 @@ export class UserService implements UserServiceInterface{
 
     async update(data: UpdateUserDto): Promise<AppResult<SerializedUserEntity>> {
         const userIdVo = (UUIDVo.fromStr(data.userId)).unwrap()
-        const user = await this.model.fetchById(userIdVo)
+        const user = await this.repo.fetchById(userIdVo)
         if (user.isErr()) {
             return AppResult.Err(user.unwrapErr())
         }
 
         if (data.email) {
-            const emailUser = await this.model.fetchByEmail(data.email)
+            const emailUser = await this.repo.fetchByEmail(data.email)
             if (emailUser.isOk() && emailUser.unwrap().Id.serialize() !== data.userId) {
                 return AppResult.Err(AppError.InvalidData("Email already exists"))
             }
         }
 
         if (data.username) {
-            const usernameUser = await this.model.fetchByUsername(data.username)
+            const usernameUser = await this.repo.fetchByUsername(data.username)
             if (usernameUser.isOk() && usernameUser.unwrap().Id.serialize() !== data.userId) {
                 return AppResult.Err(AppError.InvalidData("Username already exists"))
             }
         }
         const userEnt = user.unwrap()
         userEnt.update(data)
-        const result = await this.model.update(userEnt)
+        const result = await this.repo.update(userEnt)
         return matchRes(result, {
             Ok: (user) => AppResult.fromResult(Result.Ok(user.serialize())),
             Err: (err) => AppResult.Err(err)
@@ -98,7 +97,7 @@ export class UserService implements UserServiceInterface{
 
     async changePassword(data: UserPasswordResetDto): Promise<AppResult<SerializedUserEntity>> {
         const userIdVo = (UUIDVo.fromStr(data.userId)).unwrap()
-        const userInfo = await this.model.fetchById(userIdVo)
+        const userInfo = await this.repo.fetchById(userIdVo)
         if (userInfo.isErr()) {
             return AppResult.Err(userInfo.unwrapErr())
         }
@@ -113,7 +112,7 @@ export class UserService implements UserServiceInterface{
         const passwordHash = await bcrypt.hash(data.newPassword, 10)
         currentDetails.update({ password: passwordHash })
 
-        const result = await this.model.update(currentDetails)
+        const result = await this.repo.update(currentDetails)
         return matchRes(result, {
             Ok: (user) => AppResult.fromResult(Result.Ok(user.serialize())),
             Err: (err) => AppResult.Err(err)
@@ -122,11 +121,11 @@ export class UserService implements UserServiceInterface{
 
     async delete({ userId }: GetUserDto): Promise<AppResult<SerializedUserEntity>> {
         const userIdVo = (UUIDVo.fromStr(userId)).unwrap()
-        const user = await this.model.fetchById(userIdVo)
+        const user = await this.repo.fetchById(userIdVo)
         if (user.isErr()) {
             return AppResult.Err(user.unwrapErr())
         }
-        const result = await this.model.deleteById(userIdVo)
+        const result = await this.repo.deleteById(userIdVo)
         return matchRes(result, {
             Ok: (user) => AppResult.fromResult(Result.Ok(user.serialize())),
             Err: (err) => AppResult.Err(err)

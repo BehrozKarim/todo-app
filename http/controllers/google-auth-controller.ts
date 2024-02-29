@@ -2,10 +2,15 @@ import {google} from 'googleapis';
 import {Request, Response} from 'express';
 import {googleAuthCallbackService} from '../../src/infra/google-auth-service';
 import {Result } from 'oxide.ts';
+import {config} from '../../src/infra/config/config';
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URL;
+// const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+// const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+// const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URL;
+
+const CLIENT_ID = config.googleClientId;
+const CLIENT_SECRET = config.googleClientSecret;
+const REDIRECT_URI = config.googleRedirectUrl;
 
 const oAuth2Client = new google.auth.OAuth2(
     CLIENT_ID,

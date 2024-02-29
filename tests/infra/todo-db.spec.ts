@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import sinon from 'sinon';
-import { TodoDbRepo } from '../../src/infra/stores/todo-db-repo';
+import { TodoDbRepo } from '../../src/infra/Repos/todo-db-repo';
 import { TaskEntity } from '../../src/domain/todo-entity';
 import { Result } from "@carbonteq/fp";
-import prisma from '../../client/prisma-client';
+import prisma from '../../src/infra/client/prisma-client';
 
 const db = new TodoDbRepo();
 

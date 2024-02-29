@@ -19,30 +19,20 @@ interface UserControllerInterface {
     changePassword: (req: customRequest, res: Response) => Promise<void>
 }
 
-container.register<UserServiceInterface>("UserServiceInterface", { useClass: UserService })
 @injectable()
-class UserController implements UserControllerInterface {
-    constructor(@inject("UserServiceInterface") private readonly service: UserServiceInterface) {}
+export class UserController implements UserControllerInterface {
+    constructor(@inject("UserServiceInterface") private readonly uService: UserServiceInterface) {}
 
     createUser = async (req: Request, res: Response) => {
         const dto = NewUserDto.create(req.body)
-        if (dto.isErr()) {
-            res.status(400).json(dto.unwrapErr())
-            return
-        }
-
-        const result = await this.service.create(dto.unwrap())
+        const result = await this.uService.create(dto.unwrap())
         const response = HttpResponse.fromAppResult(result)
         res.status(response.status).json(await cleanUserData(response.data))
     }
 
     login = async (req: Request, res: Response) => {
         const dto = UserLoginDto.create(req.body)
-        if (dto.isErr()) {
-            res.status(400).json(dto.unwrapErr())
-            return
-        }
-        const result = await this.service.login(dto.unwrap())
+        const result = await this.uService.login(dto.unwrap())
         const response = HttpResponse.fromAppResult(result)
         res.status(response.status).json(await cleanLoginData(response.data))
     }
@@ -53,73 +43,30 @@ class UserController implements UserControllerInterface {
 
     updateUser = async (req: customRequest, res: Response) => {
 
-        if (req.body.userId){
-            const dto = UpdateUserDto.create(req.body)
-            if (dto.isErr()) {
-                res.status(400).json(dto.unwrapErr())
-                return
-            }
-            const result = await this.service.update(dto.unwrap())
-            const response = HttpResponse.fromAppResult(result)
-            res.status(response.status).json(await cleanUserData(response.data))
-
-        }
-        else {
-            res.status(400).json("Invalid Request")
-        }
+        const dto = UpdateUserDto.create(req.body)
+        const result = await this.uService.update(dto.unwrap())
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(await cleanUserData(response.data))
     }
 
     deleteUser = async (req: customRequest, res: Response) => {
-        if (req.body.userId){
-            const dto = GetUserDto.create({userId: req.body.userId})
-            if (dto.isErr()) {
-                res.status(400).json(dto.unwrapErr())
-                return
-            }
-            const result = await this.service.delete(dto.unwrap())
-            const response = HttpResponse.fromAppResult(result)
-            res.status(response.status).json(await cleanUserData(response.data))
-
-        }
-        else {
-            res.status(400).json("Invalid Request")
-        }
+        const dto = GetUserDto.create({userId: req.body.userId})
+        const result = await this.uService.delete(dto.unwrap())
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(await cleanUserData(response.data))
     }
 
     getUser = async (req: customRequest, res: Response) => {
-        if (req.body.userId){
-            const dto =  GetUserDto.create({userId: req.body.userId})
-            if (dto.isErr()) {
-                res.status(400).json(dto.unwrapErr())
-                return
-            }
-            const result = await this.service.get(dto.unwrap())
-            const response = HttpResponse.fromAppResult(result)
-            res.status(response.status).json(await cleanUserData(response.data))
-
-        }
-        else {
-            res.status(400).json("Invalid Request")
-        }
+        const dto =  GetUserDto.create({userId: req.body.userId})
+        const result = await this.uService.get(dto.unwrap())
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(await cleanUserData(response.data))
     }
 
     changePassword = async (req: customRequest, res: Response) => {
-        if (req.body.userId){
-            const dto = UserPasswordResetDto.create(req.body)
-            if (dto.isErr()) {
-                res.status(400).json(dto.unwrapErr())
-                return
-            }
-            const result = await this.service.changePassword(dto.unwrap())
-            const response = HttpResponse.fromAppResult(result)
-            res.status(response.status).json(await cleanUserData(response.data))
-
-        }
-        else {
-            res.status(400).json("Invalid Request")
-        }
+        const dto = UserPasswordResetDto.create(req.body)
+        const result = await this.uService.changePassword(dto.unwrap())
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(await cleanUserData(response.data))
     }
 }
-
-const controller : UserControllerInterface = container.resolve(UserController)
-export default controller

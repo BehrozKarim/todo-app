@@ -16,93 +16,44 @@ interface TodoControllerInterface {
     deleteTask: (req: customRequest, res: Response) => Promise<void>
 }
 
-container.register<TaskServiceInterface>("TaskServiceInterface", { useClass: TaskService })
 @injectable()
-class TodoController {
-    constructor(@inject("TaskServiceInterface") private readonly service: TaskServiceInterface) {}
+export class TodoController implements TodoControllerInterface{
+    constructor(@inject("TaskServiceInterface") private readonly tService: TaskServiceInterface) {}
 
     createTask = async (req: customRequest, res: Response) => {
-        if (req.body.userId){
-            const dto = NewTodoDto.create(req.body)
-            if (dto.isErr()) {
-                res.status(400).json(dto.unwrapErr())
-                return
-            }
-            const result = await this.service.create(dto.unwrap())
-            const response = HttpResponse.fromAppResult(result)
-            res.status(response.status).json(response.data)
-
-        }
-        else {
-            res.status(400).json("Invalid Request")
-        }
+        const dto = NewTodoDto.create(req.body)
+        const result = await this.tService.create(dto.unwrap())
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(response.data)
     }
 
     getTask = async (req: customRequest, res: Response) => {
-        if (req.body.userId){
-            const dto = FetchTodoDto.create({id: req.params.id, userId: req.body.userId})
-            if (dto.isErr()) {
-                res.status(400).json(dto.unwrapErr())
-                return
-            }
-            const result = await this.service.get(dto.unwrap())
-            const response = HttpResponse.fromAppResult(result)
-            res.status(response.status).json(response.data)
-
-        }
-        else {
-            res.status(400).json("Invalid Request")
-        }
+        const dto = FetchTodoDto.create({id: req.params.id, userId: req.body.userId})
+        const result = await this.tService.get(dto.unwrap())
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(response.data)
     }
 
     updateTask = async (req: customRequest, res: Response) => {
-        if (!req.body.userId) {
-            res.status(401).json({message: "Unauthorized"})
-            return
-        }
         const dto = UpdateTodoDto.create({...req.body, id: req.params.id})
-        if (dto.isErr()) {
-            res.status(400).json(dto.unwrapErr())
-            return
-        }
-        const result = await this.service.update(dto.unwrap())
+        const result = await this.tService.update(dto.unwrap())
         const response = HttpResponse.fromAppResult(result)
         res.status(response.status).json(response.data)
 
     }
 
     getAllUserTasks = async (req: customRequest, res: Response) => {
-        if (req.body.userId){
-            const dto = FetchAllUserTodoDto.create({userId: req.body.userId, page: Number(req.query.page)})
-            if (dto.isErr()) {
-                res.status(400).json(dto.unwrapErr())
-                return
-            }
-            const result = await this.service.getAllUserTasks(dto.unwrap())
-            const response = HttpResponse.fromAppResult(result)
-            res.status(response.status).json(response.data)
-
-        }
+        const dto = FetchAllUserTodoDto.create({userId: req.body.userId, page: Number(req.query.page)})
+        const result = await this.tService.getAllUserTasks(dto.unwrap())
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(response.data)
     }
 
     deleteTask = async (req: customRequest, res: Response) => {
-        if (req.body.userId){
-            const dto = FetchTodoDto.create({id: req.params.id, userId: req.body.userId})
-            if (dto.isErr()) {
-                res.status(400).json(dto.unwrapErr())
-                return
-            }
-            const result = await this.service.delete(dto.unwrap())
-            const response = HttpResponse.fromAppResult(result)
-            res.status(response.status).json(response.data)
-
-        }
-        else {
-            res.status(400).json("Invalid Request")
-        }
+        const dto = FetchTodoDto.create({id: req.params.id, userId: req.body.userId})
+        const result = await this.tService.delete(dto.unwrap())
+        const response = HttpResponse.fromAppResult(result)
+        res.status(response.status).json(response.data)
     }
     
 }
-
-const controller : TodoControllerInterface = container.resolve(TodoController)
-export default controller
